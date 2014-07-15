@@ -1,9 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import os
 import sys
-#print os.isatty(0)
 
-
-print sys.stdin.isatty(), os.environ.get("TERM", None)
+print(sys.stdin.isatty(), os.environ.get("TERM", None))
 

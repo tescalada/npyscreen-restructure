@@ -1,0 +1,10 @@
+syntax: glob
+
+*.pyc
+example-addressbook.db
+*.gz
+*.asc
+*.gpg
+*.sig
+*.DS_Store
+.DS_Store

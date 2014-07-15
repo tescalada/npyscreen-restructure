@@ -9,8 +9,8 @@ class TestApp(npyscreen.NPSApp):
         F = EditorFormExample()
         F.wStatus1.value = "Status Line "
         F.wStatus2.value = "Second Status Line "
-        with open("example-war-and-peace.py", 'r') as war_and_peace:
-             text = war_and_peace.read()
+        with open(__file__, 'r') as inf:
+             text = inf.read()
         F.wMain.value = text        
 
 

@@ -1,4 +1,5 @@
-#!/usr/bin/python
+# encoding: utf-8
+
 from . import proto_fm_screen_area
 from . import wgwidget  as widget
 from . import wgbutton  as button
@@ -14,8 +15,8 @@ from . import util_viewhelp
 from . import npysGlobalOptions as GlobalOptions
 from .globals import DISABLE_RESIZE_SYSTEM
 
-class _FormBase(proto_fm_screen_area.ScreenArea, 
-        widget.InputHandler, 
+class _FormBase(proto_fm_screen_area.ScreenArea,
+        widget.InputHandler,
         wgwidget_proto._LinePrinter):
     BLANK_COLUMNS_RIGHT= 2
     BLANK_LINES_BASE   = 2
@@ -25,11 +26,11 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
     DEFAULT_X_OFFSET = 2
     PRESERVE_SELECTED_WIDGET_DEFAULT = False # Preserve cursor location between displays?
     FRAMED = True
-    
+
     ALLOW_RESIZE = True
     FIX_MINIMUM_SIZE_WHEN_CREATED = True
-    
-    def __init__(self, name=None, parentApp=None, framed=None, help=None, color='FORMDEFAULT', 
+
+    def __init__(self, name=None, parentApp=None, framed=None, help=None, color='FORMDEFAULT',
                     widget_list=None, cycle_widgets=False, *args, **keywords):
         super(_FormBase, self).__init__(*args, **keywords)
         self.preserve_selected_widget = self.__class__.PRESERVE_SELECTED_WIDGET_DEFAULT
@@ -54,7 +55,7 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
         self.help = help
 
         self.color = color
-        
+
         self.cycle_widgets = cycle_widgets
 
         self.set_up_handlers()
@@ -64,12 +65,12 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
         if widget_list:
             self.create_widgets_from_list(widget_list)
         self.create()
-        
+
         if self.FIX_MINIMUM_SIZE_WHEN_CREATED:
             self.min_l = self.lines
             self.min_c = self.columns
-            
-            
+
+
     def resize(self):
         pass
 
@@ -99,13 +100,13 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
         global DISABLE_RESIZE_SYSTEM
         if DISABLE_RESIZE_SYSTEM:
             return False
-            
+
         if not self.ALLOW_RESIZE:
             return False
-            
+
         if hasattr(self, 'parentApp'):
             self.parentApp.resize()
-            
+
         self._create_screen()
         self.resize()
         for w in self._widgets__:
@@ -120,7 +121,7 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
 
     def set_up_handlers(self):
         self.complex_handlers = []
-        self.handlers = { 
+        self.handlers = {
                     curses.KEY_F1: self.h_display_help,
                     "KEY_F(1)": self.h_display_help,
                     "^O":       self.h_display_help,
@@ -150,7 +151,7 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
 
     def do_nothing(self, *args, **keywords):
         pass
-    
+
     def exit_editing(self, *args, **keywords):
         self.editing = False
         try:
@@ -161,7 +162,7 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
             self._widgets__[self.editw].editing = False
         except:
             pass
-    
+
     def adjust_widgets(self):
         """This method can be overloaded by derived classes. It is called when editing any widget, as opposed to
         the while_editing() method, which may only be called when moving between widgets.  Since it is called for
@@ -171,7 +172,7 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
     def while_editing(self, *args, **keywords):
         """This function gets called during the edit loop, on each iteration
         of the loop.  It does nothing: it is here to make customising the loop
-        as easy as overriding this function. A proxy to the currently selected widget is 
+        as easy as overriding this function. A proxy to the currently selected widget is
         passed to the function."""
 
     def on_screen(self):
@@ -250,19 +251,19 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
     def h_display(self, input):
         self._resize()
         self.DISPLAY()
-        
+
     def safe_get_mouse_event(self):
         try:
             mouse_event = curses.getmouse()
             return mouse_event
         except _curses.error:
             return None
-    
+
     def get_and_use_mouse_event(self):
         mouse_event = self.safe_get_mouse_event()
         if mouse_event:
             self.use_mouse_event(mouse_event)
-        
+
     def use_mouse_event(self, mouse_event):
         wg = self.find_mouse_handler(mouse_event)
         if wg:
@@ -271,7 +272,7 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
                 wg.handle_mouse_event(mouse_event)
         else:
             curses.beep()
-    
+
     def find_mouse_handler(self, mouse_event):
         #mouse_id, x, y, z, bstate = mouse_event
         for wd in self._widgets__:
@@ -281,7 +282,7 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
             except AttributeError:
                 pass
         return None
-        
+
     def set_editing(self, wdg):
         try:
             self.editw = self._widgets__.index(wdg)
@@ -296,18 +297,18 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
             else:
                 r = list(range(self.editw+1, len(self._widgets__))) + list(range(0, self.editw))
             for n in r:
-                if self._widgets__[n].editable and not self._widgets__[n].hidden: 
+                if self._widgets__[n].editable and not self._widgets__[n].hidden:
                     self.editw = n
                     break
         self.display()
 
 
     def find_previous_editable(self, *args):
-        if not self.editw == 0:     
+        if not self.editw == 0:
             # remember that xrange does not return the 'last' value,
             # so go to -1, not 0! (fence post error in reverse)
             for n in range(self.editw-1, -1, -1 ):
-                if self._widgets__[n].editable and not self._widgets__[n].hidden: 
+                if self._widgets__[n].editable and not self._widgets__[n].hidden:
                     self.editw = n
                     break
 
@@ -353,8 +354,8 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
                 #self.curses_pad.addstr(0,1, ' '+str(_title)+' ')
                 if isinstance(_title, bytes):
                     _title = _title.decode('utf-8', 'replace')
-                self.add_line(0,1, 
-                    _title, 
+                self.add_line(0,1,
+                    _title,
                     self.make_attributes_list(_title, curses.A_NORMAL),
                     self.columns-4
                     )
@@ -367,7 +368,7 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
                 if isinstance(help_advert, bytes):
                     help_advert = help_advert.decode('utf-8', 'replace')
                 self.add_line(
-                 0, self.curses_pad.getmaxyx()[1]-len(help_advert)-2, 
+                 0, self.curses_pad.getmaxyx()[1]-len(help_advert)-2,
                  help_advert,
                  self.make_attributes_list(help_advert, curses.A_NORMAL),
                  len(help_advert)
@@ -385,12 +386,18 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
 
 
     def add_widget(self, widgetClass, w_id=None, max_height=None, rely=None, relx=None, *args, **keywords):
-        """Add a widget to the form.  The form will do its best to decide on placing, unless you override it.
-        The form of this function is add_widget(WidgetClass, ....) with any arguments or keywords supplied to
-        the widget. The wigdet will be added to self._widgets__
+        """
+        Add a widget to the form.  The form will do its best to decide on
+        placing, unless you override it.
 
-        It is safe to use the return value of this function to keep hold of the widget, since that is a weak
-        reference proxy, but it is not safe to keep hold of self._widgets__"""
+        The form of this function is add_widget(WidgetClass, ....) with any
+        arguments or keywords supplied to the widget. The wigdet will be added
+        to self._widgets__
+
+        It is safe to use the return value of this function to keep hold of the
+        widget, since that is a weak reference proxy, but it is not safe to keep
+        hold of self._widgets__
+        """
 
         if rely is None:
             rely = self.nextrely
@@ -400,13 +407,13 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
         if max_height is False:
             max_height = self.curses_pad.getmaxyx()[0] - rely - 1
 
-        _w = widgetClass(self, 
-                rely=rely, 
-                relx=relx, 
-                max_height=max_height, 
+        _w = widgetClass(self,
+                rely=rely,
+                relx=relx,
+                max_height=max_height,
                 *args, **keywords)
 
-        self.nextrely = _w.height + _w.rely 
+        self.nextrely = _w.height + _w.rely
         self._widgets__.append(_w)
         w_proxy = weakref.proxy(_w)
         if not w_id:
@@ -421,25 +428,27 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
 
     add = add_widget
 
+
 class FormBaseNew(form_edit_loop.FormNewEditLoop, _FormBase):
     # use the new-style edit loop.
     pass
 
-class Form(form_edit_loop.FormDefaultEditLoop, _FormBase, ):
+
+class Form(form_edit_loop.FormDefaultEditLoop, _FormBase):
     #use the old-style edit loop
     pass
-    
+
     def resize(self):
         super(Form, self).resize()
         self.move_ok_button()
-    
-    
-    
+
+
 class FormBaseNewExpanded(form_edit_loop.FormNewEditLoop, _FormBase):
     BLANK_LINES_BASE   = 1
     OK_BUTTON_BR_OFFSET = (1,6)
     # use the new-style edit loop.
     pass
+
 
 class FormExpanded(form_edit_loop.FormDefaultEditLoop, _FormBase, ):
     BLANK_LINES_BASE   = 1
@@ -447,9 +456,7 @@ class FormExpanded(form_edit_loop.FormDefaultEditLoop, _FormBase, ):
     #use the old-style edit loop
     pass
 
-    
-    
-    
+
 class TitleForm(Form):
     """A form without a box, just a title line"""
     BLANK_LINES_BASE    = 1
@@ -461,21 +468,23 @@ class TitleForm(Form):
     #DEFAULT_X_OFFSET = 1
     def draw_form(self):
         MAXY, MAXX = self.curses_pad.getmaxyx()
-        self.curses_pad.hline(0, 0, curses.ACS_HLINE, MAXX) 
+        self.curses_pad.hline(0, 0, curses.ACS_HLINE, MAXX)
         self.draw_title_and_help()
-        
+
+
 class TitleFooterForm(TitleForm):
     BLANK_LINES_BASE=1
     def draw_form(self):
         MAXY, MAXX = self.curses_pad.getmaxyx()
 
         if self.editing:
-            self.curses_pad.hline(MAXY-1, 0, curses.ACS_HLINE, 
+            self.curses_pad.hline(MAXY-1, 0, curses.ACS_HLINE,
                     MAXX - self.__class__.OK_BUTTON_BR_OFFSET[1] - 1)
         else:
             self.curses_pad.hline(MAXY-1, 0, curses.ACS_HLINE, MAXX-1)
 
         super(TitleFooterForm, self).draw_form()
+
 
 class SplitForm(Form):
     MOVE_LINE_ON_RESIZE = False
@@ -487,7 +496,7 @@ class SplitForm(Form):
                 self.draw_line_at = draw_line_at
             else:
                 self.draw_line_at = self.get_half_way()
-    
+
     def draw_form(self,):
         MAXY, MAXX = self.curses_pad.getmaxyx()
         super(SplitForm, self).draw_form()
@@ -495,12 +504,12 @@ class SplitForm(Form):
 
     def get_half_way(self):
         return self.curses_pad.getmaxyx()[0] // 2
-    
+
     def resize(self):
         super(SplitForm, self).resize()
         if self.MOVE_LINE_ON_RESIZE:
             self.draw_line_at = self.get_half_way()
-    
+
 
 
 

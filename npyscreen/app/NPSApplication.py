@@ -1,19 +1,21 @@
-#!/usr/bin/env python
+# encoding: utf-8
 import curses
-import locale
-import _curses
+#import locale
+#import _curses
 
-from . import npyssafewrapper
+from npyscreen import npyssafewrapper
 
 
 class AlreadyOver(Exception):
     pass
 
+
 class NPSApp(object):
     _run_called = 0
+
     def main(self):
         """Overload this method to create your application"""
-    
+
     def resize(self):
         pass
 
@@ -29,4 +31,5 @@ class NPSApp(object):
         if fork is None:
             return npyssafewrapper.wrapper(self.__remove_argument_call_main)
         else:
-            return npyssafewrapper.wrapper(self.__remove_argument_call_main, fork=fork)
+            return npyssafewrapper.wrapper(self.__remove_argument_call_main,
+                                           fork=fork)

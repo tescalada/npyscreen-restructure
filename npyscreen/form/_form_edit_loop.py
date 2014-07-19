@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # encoding: utf-8
 """
 form_edit_loop.py
@@ -19,16 +18,16 @@ class FormNewEditLoop(object):
         pass
     def _during_edit_loop(self):
         pass
-    
+
     def edit_loop(self):
         self.editing = True
         self.display()
         while not self._widgets__[self.editw].editable:
             self.editw += 1
-            if self.editw > len(self._widgets__)-1: 
+            if self.editw > len(self._widgets__)-1:
                 self.editing = False
                 return False
-        
+
         while self.editing:
             if not self.ALL_SHOWN: self.on_screen()
             self.while_editing(weakref.proxy(self._widgets__[self.editw]))
@@ -41,7 +40,7 @@ class FormNewEditLoop(object):
             self.handle_exiting_widgets(self._widgets__[self.editw].how_exited)
 
             if self.editw > len(self._widgets__)-1: self.editw = len(self._widgets__)-1
-        
+
     def edit(self):
         self.pre_edit_loop()
         self.edit_loop()
@@ -60,7 +59,7 @@ class FormDefaultEditLoop(object):
         self.ok_button = self.add_widget(self.__class__.OKBUTTON_TYPE, name=ok_button_text, rely=my, relx=mx, use_max_space=True)
         ok_button_postion = len(self._widgets__)-1
         self.ok_button.update()
-        # End add buttons 
+        # End add buttons
         self.editing=True
         if self.editw < 0: self.editw=0
         if self.editw > len(self._widgets__)-1:
@@ -74,7 +73,7 @@ class FormDefaultEditLoop(object):
 
         while not self._widgets__[self.editw].editable:
             self.editw += 1
-            if self.editw > len(self._widgets__)-1: 
+            if self.editw > len(self._widgets__)-1:
                 self.editing = False
                 return False
 
@@ -97,16 +96,16 @@ class FormDefaultEditLoop(object):
         del self.ok_button
         self.nextrely, self.nextrelx = tmp_rely, tmp_relx
         self.display()
-        
+
         #try:
         #    self.parentApp._FORM_VISIT_LIST.pop()
         #except:
         #    pass
-        
+
 
         self.editing = False
         self.erase()
-    
+
     def move_ok_button(self):
         if hasattr(self, 'ok_button'):
             my, mx = self.curses_pad.getmaxyx()
@@ -116,4 +115,4 @@ class FormDefaultEditLoop(object):
             self.ok_button.rely = my
 
 
-    
+

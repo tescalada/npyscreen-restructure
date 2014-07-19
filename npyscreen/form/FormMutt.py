@@ -1,4 +1,5 @@
-#/usr/bin/env python
+# encoding: utf-8
+
 import curses
 from . import fmForm
 from . import fmFormWithMenus
@@ -25,31 +26,31 @@ class FormMutt(fmForm.FormBaseNew):
     #MAIN_WIDGET_CLASS = editmultiline.MultiLineEdit
     def __init__(self, cycle_widgets = True, *args, **keywords):
         super(FormMutt, self).__init__(cycle_widgets=cycle_widgets, *args, **keywords)
-    
-    
+
+
     def draw_form(self):
         MAXY, MAXX = self.lines, self.columns #self.curses_pad.getmaxyx()
-        self.curses_pad.hline(0, 0, curses.ACS_HLINE, MAXX-1)  
-        self.curses_pad.hline(MAXY-2-self.BLANK_LINES_BASE, 0, curses.ACS_HLINE, MAXX-1)  
+        self.curses_pad.hline(0, 0, curses.ACS_HLINE, MAXX-1)
+        self.curses_pad.hline(MAXY-2-self.BLANK_LINES_BASE, 0, curses.ACS_HLINE, MAXX-1)
 
     def create(self):
         MAXY, MAXX    = self.lines, self.columns
-        
-        self.wStatus1 = self.add(self.__class__.STATUS_WIDGET_CLASS,  rely=0, 
+
+        self.wStatus1 = self.add(self.__class__.STATUS_WIDGET_CLASS,  rely=0,
                                         relx=self.__class__.STATUS_WIDGET_X_OFFSET,
-                                        editable=False,  
+                                        editable=False,
                                         )
-        
+
         if self.__class__.MAIN_WIDGET_CLASS:
-            self.wMain    = self.add(self.__class__.MAIN_WIDGET_CLASS,    
-                                            rely=self.__class__.MAIN_WIDGET_CLASS_START_LINE,  
+            self.wMain    = self.add(self.__class__.MAIN_WIDGET_CLASS,
+                                            rely=self.__class__.MAIN_WIDGET_CLASS_START_LINE,
                                             relx=0,     max_height = -2,
                                             )
-        self.wStatus2 = self.add(self.__class__.STATUS_WIDGET_CLASS,  rely=MAXY-2-self.BLANK_LINES_BASE, 
+        self.wStatus2 = self.add(self.__class__.STATUS_WIDGET_CLASS,  rely=MAXY-2-self.BLANK_LINES_BASE,
                                         relx=self.__class__.STATUS_WIDGET_X_OFFSET,
-                                        editable=False,  
+                                        editable=False,
                                         )
-        
+
         if not self.__class__.COMMAND_WIDGET_BEGIN_ENTRY_AT:
             self.wCommand = self.add(self.__class__.COMMAND_WIDGET_CLASS, name=self.__class__.COMMAND_WIDGET_NAME,
                                     rely = MAXY-1-self.BLANK_LINES_BASE, relx=0,)
@@ -60,7 +61,7 @@ class FormMutt(fmForm.FormBaseNew):
                                     begin_entry_at = self.__class__.COMMAND_WIDGET_BEGIN_ENTRY_AT,
                                     allow_override_begin_entry_at = self.__class__.COMMAND_ALLOW_OVERRIDE_BEGIN_ENTRY_AT
                                     )
-            
+
         self.wStatus1.important = True
         self.wStatus2.important = True
         self.nextrely = 2
@@ -70,7 +71,7 @@ class FormMutt(fmForm.FormBaseNew):
         if hasattr(self, 'wMain'):
             if not self.wMain.hidden:
                 self.wMain.display()
-        
+
     def resize(self):
         super(FormMutt, self).resize()
         MAXY, MAXX    = self.lines, self.columns

@@ -1,8 +1,18 @@
 # encoding: utf-8
 
-#from .NPSApplication import NPSApp
-#from .NPSApplicationManaged import NPSAppManaged
-#from .NPSApplicationAdvanced import NPSAppAdvanced
+"""
+The npyscreen.app package provides Application classes which are the basis for
+creating terminal applications using npyscreen.
+
+The following classes are provided in this package:
+
+SimpleApp   - rudimentary application class that should only be used for special
+              or very simple cases.
+
+App         - standard application class that manages multiple forms.
+AdvancedApp - experimental, does nothing right now!
+"""
+
 
 import curses
 import weakref
@@ -14,7 +24,7 @@ class AlreadyOver(Exception):  # Where is this used?
     pass
 
 
-class NPSApp(object):
+class SimpleApp(object):
     _run_called = 0
 
     def main(self):
@@ -39,7 +49,7 @@ class NPSApp(object):
                                            fork=fork)
 
 
-class NPSAppManaged(NPSApp):
+class App(SimpleApp):
     """
     This class is intended to make it easier to create applications with many
     screens. With this in mind, consider the following:
@@ -90,7 +100,7 @@ class NPSAppManaged(NPSApp):
     STARTING_FORM = "MAIN"
 
     def __init__(self):
-        super(NPSAppManaged, self).__init__()
+        super(App, self).__init__()
         self._FORM_VISIT_LIST = []
         self.NEXT_ACTIVE_FORM = self.__class__.STARTING_FORM
         self._LAST_NEXT_ACTIVE_FORM = None
@@ -254,7 +264,7 @@ class NPSAppManaged(NPSApp):
         """
 
 
-class NPSAppAdvanced(NPSAppManaged):
+class AdvancedApp(App):
     """
     EXPERIMENTAL and NOT for use.
 

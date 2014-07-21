@@ -1,7 +1,8 @@
-#!/usr/bin/env python
 # encoding: utf-8
+
 import curses
 import _curses
+
 #import curses.wrapper
 import locale
 import os
@@ -13,6 +14,7 @@ import warnings
 _NEVER_RUN_INITSCR = True
 _SCREEN = None
 
+
 def wrapper_basic(call_function):
     #set the locale properly
     locale.setlocale(locale.LC_ALL, '')
@@ -23,9 +25,9 @@ def wrapper_basic(call_function):
 #   screen = curses.initscr()
 #   curses.noecho()
 #   curses.cbreak()
-#   
+#
 #   return_code = call_function(screen)
-#   
+#
 #   curses.nocbreak()
 #   curses.echo()
 #   curses.endwin()
@@ -70,7 +72,7 @@ def wrapper_fork(call_function, reset=True):
 
 def external_reset():
     subprocess.call(['reset', '-Q'])
-    
+
 def wrapper_no_fork(call_function, reset=False):
     global _NEVER_RUN_INITSCR
     if not _NEVER_RUN_INITSCR:
@@ -92,9 +94,9 @@ def wrapper_no_fork(call_function, reset=False):
     curses.noecho()
     curses.cbreak()
     _SCREEN.keypad(1)
-    
+
     try:
-        return_code = call_function(_SCREEN)    
+        return_code = call_function(_SCREEN)
     finally:
         _SCREEN.keypad(0)
         curses.echo()
@@ -103,4 +105,4 @@ def wrapper_no_fork(call_function, reset=False):
         curses.endwin()
         if reset:
             external_reset()
-    return return_code  
+    return return_code

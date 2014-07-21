@@ -12,14 +12,14 @@ class TestApp(npyscreen.NPSApp):
         F.wMain.editable  = False
         F.wMain.autowrap = True
         F.wMain.center = True
-        
-        
+
+
         #F.wMain.buffer([str(r) for r in range(100)], scroll_if_editing=True)
         #with open("/Users/nicholas/Downloads/pg2600.txt", 'r') as war_and_peace:
         with open("setup.py", 'r') as war_and_peace:
             F.wMain.values = war_and_peace.readlines()[:50]
             #F.wMain.values = war_and_peace.readlines()
-        
+
         F.edit()
 
 

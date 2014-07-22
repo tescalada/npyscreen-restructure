@@ -5,11 +5,11 @@ import curses.ascii
 import sys
 import locale
 #import curses.wrapper
-from . import wgwidget as widget
+from . import Widget
 from .. import global_options
 
 
-class TextfieldBase(widget.Widget):
+class TextfieldBase(Widget):
     ENSURE_STRING_VALUE = True
     def __init__(self, screen, value='', highlight_color='CURSOR', highlight_whole_widget=False,
         invert_highlight_color=True,

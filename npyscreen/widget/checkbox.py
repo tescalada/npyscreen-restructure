@@ -1,9 +1,8 @@
 # encoding: utf-8
 
-from .wgtextbox   import Textfield
-from .wgwidget    import Widget
+from .textbox import Textfield
+from . import Widget, EXITED_DOWN
 #from .wgmultiline import MultiLine
-from . import wgwidget as widget
 import curses
 
 
@@ -35,7 +34,7 @@ class _ToggleControl(Widget):
         if not self.value:
             self.h_toggle(ch)
         self.editing = False
-        self.how_exited = widget.EXITED_DOWN
+        self.how_exited = EXITED_DOWN
 
 
 class CheckboxBare(_ToggleControl):

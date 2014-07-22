@@ -1,9 +1,9 @@
 # encoding: utf-8
 
-import curses
+#import curses  # unused
 import weakref
-from . import wgtextbox  as textbox
-from . import wgwidget   as widget
+from . import textbox
+from . import widget
 
 
 class TitleText(widget.Widget):
@@ -39,7 +39,7 @@ class TitleText(widget.Widget):
             self.use_two_lines = use_two_lines
 
         self._passon = kwargs.copy()
-        for dangerous in ('relx', 'rely','value',):  # 'width','max_width'):
+        for dangerous in ('relx', 'rely','value'):  # 'width','max_width'):
             try:
                 self._passon.pop(dangerous)
             except:

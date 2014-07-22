@@ -37,7 +37,8 @@ def wrapper(call_function, fork=None, reset=True):
     global _NEVER_RUN_INITSCR
     if fork:
         wrapper_fork(call_function, reset=reset)
-    elif fork == False:
+    #elif fork == False:
+    elif not fork:
         wrapper_no_fork(call_function)
     else:
         if _NEVER_RUN_INITSCR:
@@ -65,12 +66,15 @@ def wrapper_fork(call_function, reset=True):
         curses.cbreak()
         curses.def_prog_mode()
         curses.reset_prog_mode()
-        return_code = call_function(_SCREEN)
+        #use this if you actually want the return code
+        #return_code = call_function(_SCREEN)
+        call_function(_SCREEN)
         _SCREEN.keypad(0)
         curses.echo()
         curses.nocbreak()
         curses.endwin()
         sys.exit(0)
+
 
 def external_reset():
     subprocess.call(['reset', '-Q'])
@@ -79,7 +83,7 @@ def external_reset():
 def wrapper_no_fork(call_function, reset=False):
     global _NEVER_RUN_INITSCR
     if not _NEVER_RUN_INITSCR:
-        warnings.warn("""Repeated calls of endwin may cause a memory leak. Use wrapper_fork to avoid.""")
+        warnings.warn("Repeated calls of endwin may cause a memory leak. Use wrapper_fork to avoid.")
     global _SCREEN
     return_code = None
     if _NEVER_RUN_INITSCR:

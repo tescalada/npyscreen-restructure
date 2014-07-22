@@ -106,10 +106,10 @@ class App(SimpleApp):
         self._last_active_form = None
         self._forms = {}
 
-    def add_form_class(self, f_id, form_class, *args, **keywords):
-        self._forms[f_id] = [form_class, args, keywords]
+    def add_form_class(self, f_id, form_class, *args, **kwargs):
+        self._forms[f_id] = [form_class, args, kwargs]
 
-    def add_form(self, f_id, form_class, *args, **keywords):
+    def add_form(self, f_id, form_class, *args, **kwargs):
         """
         Create a form of the given class. f_id should be a string which will
         uniquely identify the form. *args will be passed to the Form
@@ -117,7 +117,7 @@ class App(SimpleApp):
 
         Forms created in this way are handled entirely by the App class.
         """
-        fm = form_class(parent_app=self, *args, **keywords)
+        fm = form_class(parent_app=self, *args, **kwargs)
         self.register_form(f_id, fm)
         return weakref.proxy(fm)
 

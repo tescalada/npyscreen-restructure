@@ -3,11 +3,11 @@
 import curses
 import locale
 from .. import global_options
-from . import wgwidget    as widget
-from . import wgcheckbox  as checkbox
+from . import checkbox
+
 
 class MiniButton(checkbox._ToggleControl):
-    def __init__(self, screen, name='Button', *args, **keywords):
+    def __init__(self, screen, name='Button', *args, **kwargs):
         self.encoding = 'utf-8'
         if global_options.ASCII_ONLY or locale.getpreferredencoding() == 'US-ASCII':
             self._force_ascii = True
@@ -15,9 +15,9 @@ class MiniButton(checkbox._ToggleControl):
             self._force_ascii = False
         self.name = self.safe_string(name)
         self.label_width = len(name) + 2
-        super(MiniButton, self).__init__(screen, *args, **keywords)
-        if 'color' in keywords:
-            self.color = keywords['color']
+        super(MiniButton, self).__init__(screen, *args, **kwargs)
+        if 'color' in kwargs:
+            self.color = kwargs['color']
         else:
             self.color = 'CONTROL'
 

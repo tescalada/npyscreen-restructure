@@ -30,17 +30,17 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
     ALLOW_RESIZE = True
     FIX_MINIMUM_SIZE_WHEN_CREATED = True
 
-    def __init__(self, name=None, parentApp=None, framed=None, help=None, color='FORMDEFAULT',
-                    widget_list=None, cycle_widgets=False, *args, **keywords):
-        super(_FormBase, self).__init__(*args, **keywords)
+    def __init__(self, name=None, parent_app=None, framed=None, help=None, color='FORMDEFAULT',
+                    widget_list=None, cycle_widgets=False, *args, **kwargs):
+        super(_FormBase, self).__init__(*args, **kwargs)
         self.preserve_selected_widget = self.__class__.PRESERVE_SELECTED_WIDGET_DEFAULT
-        if parentApp:
+        if parent_app:
             try:
-                self.parentApp = weakref.proxy(parentApp)
+                self.parent_app = weakref.proxy(parent_app)
             except:
-                self.parentApp = parentApp
+                self.parent_app = parent_app
             try:
-                self.keypress_timeout = self.parentApp.keypress_timeout_default
+                self.keypress_timeout = self.parent_app.keypress_timeout_default
             except AttributeError:
                 pass
         if framed is None:
@@ -70,7 +70,6 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
             self.min_l = self.lines
             self.min_c = self.columns
 
-
     def resize(self):
         pass
 
@@ -82,13 +81,13 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
         self.nextrelx = self.DEFAULT_X_OFFSET
         self.editw = 0 # Index of widget to edit.
 
-    def create_widgets_from_list(self, widget_list):
+    def create_widgets_from_list(self, widget_list, **kwargs):
         # This code is currently experimental, and the API may change in future releases
         # (npyscreen.TextBox, {'rely': 2, 'relx': 7, 'editable': False})
         for line in widget_list:
             w_type   = line[0]
-            keywords = line[1]
-            self.add_widget(w_type, **keywords)
+            kwargs = line[1]
+            self.add_widget(w_type, **kwargs)
 
     def set_value(self, value):
         self.value = value
@@ -104,16 +103,14 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
         if not self.ALLOW_RESIZE:
             return False
 
-        if hasattr(self, 'parentApp'):
-            self.parentApp.resize()
+        if hasattr(self, 'parent_app'):
+            self.parent_app.resize()
 
         self._create_screen()
         self.resize()
         for w in self._widgets__:
             w._resize()
         self.DISPLAY()
-
-
 
     def create(self):
         """Programmers should over-ride this in derived classes, creating widgets here"""
@@ -149,10 +146,10 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
     def handle_exiting_widgets(self, condition):
         self.how_exited_handers[condition]()
 
-    def do_nothing(self, *args, **keywords):
+    def do_nothing(self, *args, **kwargs):
         pass
 
-    def exit_editing(self, *args, **keywords):
+    def exit_editing(self, *args, **kwargs):
         self.editing = False
         try:
             self._widgets__[self.editw].entry_widget.editing = False
@@ -164,16 +161,26 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
             pass
 
     def adjust_widgets(self):
-        """This method can be overloaded by derived classes. It is called when editing any widget, as opposed to
-        the while_editing() method, which may only be called when moving between widgets.  Since it is called for
-        every keypress, and perhaps more, be careful when selecting what should be done here."""
+        """
+        This function is called when editing any widget (as opposed to the
+        `while_editing` method, which may only be called when moving between
+        widgets). Override this function to add custom function.
 
+        It is called for every keypress, and perhaps more, be careful when
+        selecting what should be done here*.
 
-    def while_editing(self, *args, **keywords):
-        """This function gets called during the edit loop, on each iteration
-        of the loop.  It does nothing: it is here to make customising the loop
-        as easy as overriding this function. A proxy to the currently selected widget is
-        passed to the function."""
+          * What consequences might there be? UI lag? Crashing?
+        """
+        pass
+
+    def while_editing(self, *args, **kwargs):
+        """
+        This function gets called once during each iteration of the `edit` loop.
+
+        Override this function to add custom loop activity. A proxy to the
+        currently selected widget is passed to the function.
+        """
+        pass
 
     def on_screen(self):
         # is the widget in editw on sreen at the moment?
@@ -202,32 +209,6 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
         while w.relx < self.show_from_x:
             self.show_from_x -= 1
 
-## REMOVING OLD MENU CODE  def menuOfMenus(self, *args, **keywords):
-## REMOVING OLD MENU CODE   """DEPRICATED"""
-## REMOVING OLD MENU CODE   tmpmnu = Menu.Menu(name = "All Menus", show_aty=2, show_atx=2)
-## REMOVING OLD MENU CODE   #tmpmnu.before_item_select = self.display
-## REMOVING OLD MENU CODE   for mnu in self.__menus:
-## REMOVING OLD MENU CODE       text = ""
-## REMOVING OLD MENU CODE       if mnu.name: text += mnu.name
-## REMOVING OLD MENU CODE       for keypress in self.handlers.keys():
-## REMOVING OLD MENU CODE           if self.handlers[keypress] == mnu.edit:
-## REMOVING OLD MENU CODE               if keypress: text += " (%s)" % keypress
-## REMOVING OLD MENU CODE               text += " >"
-## REMOVING OLD MENU CODE       tmpmnu.add_item(text, mnu.edit)
-## REMOVING OLD MENU CODE       tmpmnu.edit()
-## REMOVING OLD MENU CODE
-## REMOVING OLD MENU CODE  def add_menu(self, menu=None, key=None, *args, **keywords):
-## REMOVING OLD MENU CODE   """DEPRICATED"""
-## REMOVING OLD MENU CODE   if menu is None:
-## REMOVING OLD MENU CODE       mu = Menu.Menu(*args, **keywords)
-## REMOVING OLD MENU CODE       self.__menus.append(mu)
-## REMOVING OLD MENU CODE   else:
-## REMOVING OLD MENU CODE       mu = menu
-## REMOVING OLD MENU CODE       self.__menus.append(mu)
-## REMOVING OLD MENU CODE   self.add_handlers({key: mu.edit})
-## REMOVING OLD MENU CODE   return weakref.proxy(mu)
-
-
     def h_display_help(self, input):
         if self.help == None: return
         if self.name:
@@ -246,7 +227,6 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
         self.display(clear=False)
         if self.editing and self.editw is not None:
             self._widgets__[self.editw].display()
-
 
     def h_display(self, input):
         self._resize()
@@ -289,7 +269,6 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
         except ValueError:
             pass
 
-
     def find_next_editable(self, *args):
         if not self.editw == len(self._widgets__):
             if not self.cycle_widgets:
@@ -301,7 +280,6 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
                     self.editw = n
                     break
         self.display()
-
 
     def find_previous_editable(self, *args):
         if not self.editw == 0:
@@ -329,7 +307,6 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
         else:
             self.show_atx = 0
 
-
     def display(self, clear=False):
         #APPLICATION_THEME_MANAGER.setTheme(self)
         if curses.has_colors() and not npysGlobalOptions.DISABLE_ALL_COLORS:
@@ -349,16 +326,15 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
     def draw_title_and_help(self):
         try:
             if self.name:
-                _title = self.name[:(self.columns-4)]
+                _title = self.name[:(self.columns - 4)]
                 _title = ' ' + str(_title) + ' '
                 #self.curses_pad.addstr(0,1, ' '+str(_title)+' ')
                 if isinstance(_title, bytes):
                     _title = _title.decode('utf-8', 'replace')
-                self.add_line(0,1,
-                    _title,
-                    self.make_attributes_list(_title, curses.A_NORMAL),
-                    self.columns-4
-                    )
+                self.add_line(0, 1, _title,
+                              self.make_attributes_list(_title,
+                                                        curses.A_NORMAL),
+                              self.columns - 4)
         except:
             pass
 
@@ -384,13 +360,18 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
             self.curses_pad.border()
             self.draw_title_and_help()
 
-
-    def add_widget(self, widgetClass, w_id=None, max_height=None, rely=None, relx=None, *args, **keywords):
+    def add_widget(self,
+                   widget_class,
+                   w_id=None,
+                   max_height=None,
+                   rely=None,
+                   relx=None,
+                   *args, **kwargs):
         """
         Add a widget to the form.  The form will do its best to decide on
         placing, unless you override it.
 
-        The form of this function is add_widget(WidgetClass, ....) with any
+        The form of this function is add_widget(widget_class, ....) with any
         arguments or keywords supplied to the widget. The wigdet will be added
         to self._widgets__
 
@@ -407,11 +388,11 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
         if max_height is False:
             max_height = self.curses_pad.getmaxyx()[0] - rely - 1
 
-        _w = widgetClass(self,
+        _w = widget_class(self,
                 rely=rely,
                 relx=relx,
                 max_height=max_height,
-                *args, **keywords)
+                *args, **kwargs)
 
         self.nextrely = _w.height + _w.rely
         self._widgets__.append(_w)
@@ -444,28 +425,29 @@ class Form(form_edit_loop.FormDefaultEditLoop, _FormBase):
 
 
 class FormBaseNewExpanded(form_edit_loop.FormNewEditLoop, _FormBase):
-    BLANK_LINES_BASE   = 1
-    OK_BUTTON_BR_OFFSET = (1,6)
+    BLANK_LINES_BASE = 1
+    OK_BUTTON_BR_OFFSET = (1, 6)
     # use the new-style edit loop.
     pass
 
 
-class FormExpanded(form_edit_loop.FormDefaultEditLoop, _FormBase, ):
-    BLANK_LINES_BASE   = 1
-    OK_BUTTON_BR_OFFSET = (1,6)
+class FormExpanded(form_edit_loop.FormDefaultEditLoop, _FormBase):
+    BLANK_LINES_BASE = 1
+    OK_BUTTON_BR_OFFSET = (1, 6)
     #use the old-style edit loop
     pass
 
 
 class TitleForm(Form):
     """A form without a box, just a title line"""
-    BLANK_LINES_BASE    = 1
-    DEFAULT_X_OFFSET    = 1
-    DEFAULT_NEXTRELY    = 1
+    BLANK_LINES_BASE = 1
+    DEFAULT_X_OFFSET = 1
+    DEFAULT_NEXTRELY = 1
     BLANK_COLUMNS_RIGHT = 0
-    OK_BUTTON_BR_OFFSET = (1,6)
+    OK_BUTTON_BR_OFFSET = (1, 6)
     #OKBUTTON_TYPE = button.MiniButton
     #DEFAULT_X_OFFSET = 1
+
     def draw_form(self):
         MAXY, MAXX = self.curses_pad.getmaxyx()
         self.curses_pad.hline(0, 0, curses.ACS_HLINE, MAXX)
@@ -489,8 +471,8 @@ class TitleFooterForm(TitleForm):
 class SplitForm(Form):
     MOVE_LINE_ON_RESIZE = False
     """Just the same as the Title Form, but with a horizontal line"""
-    def __init__(self, draw_line_at=None, *args, **keywords):
-        super(SplitForm, self).__init__(*args, **keywords)
+    def __init__(self, draw_line_at=None, *args, **kwargs):
+        super(SplitForm, self).__init__(*args, **kwargs)
         if not hasattr(self, 'draw_line_at'):
             if draw_line_at != None:
                 self.draw_line_at = draw_line_at

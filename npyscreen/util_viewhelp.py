@@ -6,8 +6,8 @@ def view_help(message, title="Message", form_color="STANDOUT"):
     from . import wgmultiline
     F = fmForm.Form(name=title, color=form_color)
     mlw = F.add(wgmultiline.Pager,)
-    mlw_width = mlw.width-1
-    
+    mlw_width = mlw.width - 1
+
     message_lines = []
     for line in message.splitlines():
         line = textwrap.wrap(line, mlw_width)
@@ -19,4 +19,4 @@ def view_help(message, title="Message", form_color="STANDOUT"):
     F.edit()
     del mlw
     del F
-    
+

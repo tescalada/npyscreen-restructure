@@ -17,7 +17,7 @@ AdvancedApp - experimental, does nothing right now!
 import curses
 import weakref
 
-from npyscreen import npyssafewrapper
+from .. import safewrapper
 
 
 class AlreadyOver(Exception):  # Where is this used?
@@ -43,9 +43,9 @@ class SimpleApp(object):
     def run(self, fork=None):
         """Run application.  Calls Mainloop wrapped properly."""
         if fork is None:
-            return npyssafewrapper.wrapper(self.__remove_argument_call_main)
+            return safewrapper.wrapper(self.__remove_argument_call_main)
         else:
-            return npyssafewrapper.wrapper(self.__remove_argument_call_main,
+            return safewrapper.wrapper(self.__remove_argument_call_main,
                                            fork=fork)
 
 
@@ -55,7 +55,7 @@ class App(SimpleApp):
     screens. With this in mind, consider the following:
 
     1. The programmer should not now select which Form to display, instead they
-       should set the `NEXT_ACTIVE_FORM` class variable. See the register_form
+       should set the `next_active_form` class variable. See the register_form
        method for details.
 
        Doing so will avoid accidentally exceeding the maximum recursion depth.
@@ -64,7 +64,6 @@ class App(SimpleApp):
 
        NB.  * Applications should therefore use this mechanism in preference to
        calling the .edit() method of any form. *
-
 
     2. Forms that are managed by this class can access a proxy to the parent
        application through their `parent_app` attribute, which is created by
@@ -88,7 +87,7 @@ class App(SimpleApp):
        This can be overridden.
 
     5. This method should be able to see which screen was last active using the
-       `self._LAST_NEXT_ACTIVE_FORM` attribute, which is only set
+       `self._last_active_form` attribute, which is only set
        just before each screen is displayed.
 
     6. Unless you override the attribute `STARTING_FORM`, the first form to be
@@ -101,32 +100,42 @@ class App(SimpleApp):
 
     def __init__(self):
         super(App, self).__init__()
-        self._FORM_VISIT_LIST = []
-        self.NEXT_ACTIVE_FORM = self.__class__.STARTING_FORM
-        self._LAST_NEXT_ACTIVE_FORM = None
-        self._Forms = {}
+        self._form_visit_list = []
+        #holds a form id (not class); set by add_form
+        self.next_active_form = self.__class__.STARTING_FORM
+        self._last_active_form = None
+        self._forms = {}
 
-    def add_form_class(self, f_id, FormClass, *args, **keywords):
-        self._Forms[f_id] = [FormClass, args, keywords]
+    def add_form_class(self, f_id, form_class, *args, **keywords):
+        self._forms[f_id] = [form_class, args, keywords]
 
-    def add_form(self, f_id, FormClass, *args, **keywords):
-        """Create a form of the given class. f_id should be a string which will uniquely identify the form. *args will be passed to the Form constructor.
-        Forms created in this way are handled entirely by the NPSAppManaged class."""
-        fm = FormClass( parentApp=self, *args, **keywords)
-        self.registerForm(f_id, fm)
+    def add_form(self, f_id, form_class, *args, **keywords):
+        """
+        Create a form of the given class. f_id should be a string which will
+        uniquely identify the form. *args will be passed to the Form
+        constructor.
+
+        Forms created in this way are handled entirely by the App class.
+        """
+        fm = form_class(parent_app=self, *args, **keywords)
+        self.register_form(f_id, fm)
         return weakref.proxy(fm)
 
     def register_form(self, f_id, fm):
-        """f_id should be a string which should uniquely identify the form.  fm should be a Form."""
-        fm.parentApp = weakref.proxy(self)
-        self._Forms[f_id] = fm
+        """
+        f_id should be a string which should uniquely identify the form.
+
+        fm should be a Form.
+        """
+        fm.parent_app = weakref.proxy(self)
+        self._forms[f_id] = fm
 
     def remove_form(self, f_id):
-        del self._Forms[f_id].parentApp
-        del self._Forms[f_id]
+        del self._forms[f_id].parent_app
+        del self._forms[f_id]
 
     def get_form(self, name):
-        f = self._Forms[name]
+        f = self._forms[name]
         try:
             return weakref.proxy(f)
         except:
@@ -134,13 +143,13 @@ class App(SimpleApp):
 
     def set_next_form(self, fmid):
         """Set the form that will be selected when the current one exits."""
-        self.NEXT_ACTIVE_FORM = fmid
+        self.next_active_form = fmid
 
     def switch_form(self, fmid):
         """Immediately switch to the form specified by fmid."""
         self._THISFORM.editing = False
-        self.setNextForm(fmid)
-        self.switchFormNow()
+        self.set_next_form(fmid)
+        self.switch_form_now()
 
     def switch_form_now(self):
         self._THISFORM.editing = False
@@ -155,72 +164,84 @@ class App(SimpleApp):
             pass
 
     def remove_last_form_from_history(self):
-        self._FORM_VISIT_LIST.pop()
-        self._FORM_VISIT_LIST.pop()
+        self._form_visit_list.pop()
+        self._form_visit_list.pop()
 
     def switch_form_previous(self, backup=STARTING_FORM):
-        self.setNextFormPrevious()
-        self.switchFormNow()
+        self.set_next_form_previous()
+        self.switch_form_now()
 
     def set_next_form_previous(self, backup=STARTING_FORM):
         try:
-            if self._THISFORM.FORM_NAME == self._FORM_VISIT_LIST[-1]:
-                self._FORM_VISIT_LIST.pop() # Remove the current form. if it is at the end of the list
-            if self._THISFORM.FORM_NAME == self.NEXT_ACTIVE_FORM:
-                #take no action if it looks as if someone has already set the next form.
-                self.setNextForm(self._FORM_VISIT_LIST.pop()) # Switch to the previous form if one exists
+            if self._THISFORM.FORM_NAME == self._form_visit_list[-1]:
+                #Remove the current form. if it is at the end of the list
+                self._form_visit_list.pop()
+            if self._THISFORM.FORM_NAME == self.next_active_form:
+                #Take no action if it looks as if someone has already set the
+                #next form.
+                #Switch to the previous form if one exists
+                self.set_next_form(self._form_visit_list.pop())
         except IndexError:
-            self.setNextForm(backup)
+            self.set_next_form(backup)
 
     def get_history(self):
-        return self._FORM_VISIT_LIST
+        return self._form_visit_list
 
     def reset_history(self):
-        self._FORM_VISIT_LIST = []
+        self._form_visit_list = []
 
     def main(self):
         """
-        Call this function to start your application, usually called indirectly through the function .run().
-        You should not override this function, but override the onInMainLoop, onStart and
-        onCleanExit methods instead, if you need to modify the application's behaviour.
+        Call this function to start your application, usually called indirectly
+        through the function `run`.
 
-        When this method is called, it will activate the form named by the class variable STARTING_FORM.  By default this Form will be called
-        'MAIN'.
+        You should not override this function, but override the
+        `on_in_main_loop`, `on_start` and `on_clean_exit` methods instead if you
+        need to modify the application's behavior.
 
-        When that form exits (user selecting an ok button or the like), the form named by object variable NEXT_ACTIVE_FORM will be activated.
+        When this method is called, it will activate the form named by the class
+        variable `STARTING_FORM`. By default this Form will be called 'MAIN'.
 
-        If NEXT_ACTIVE_FORM is None, the main() loop will exit.
+        When that form exits (user selecting an ok button or the like), the form
+        named by object variable `next_active_form` will be activated.
 
-        The form selected will be edited using it's .edit() method UNLESS it has been provided with an .activate() method,
-        in which case that method will be called instead.  This is done so that the same class of form can be made
-        NPSAppManaged aware and have the normal non-NPSAppManaged edit loop.
+        If `next_active_form` is None (or otherwise evaluates False), the `main`
+        loop will exit.
 
-        After a Form has been edited, if it has an .afterEditing method, this will be called, unless it was invoked with the activate() method.
-        A similar .beforeEditing method will be called if it exists before editing the form.  Again, the presence of a .activate method
-        will override this behaviour.
+        The form selected will be edited using it's `edit` method UNLESS it has
+        been provided with an `activate` method, in which case that method will
+        be called instead.  This is done so that the same class of form can be
+        made App aware and have the normal SimpleApp `edit` loop.
 
-        Note that NEXT_ACTIVE_FORM is a string that is the name of the form that was specified when .addForm or .registerForm was called.
+        After a Form has been edited its `after_editing` method will be called,
+        unless it was invoked with the `activate` method. A similar
+        `before_editing` method will be called prior to editing the form. Again,
+        the presence of an `activate` method will override this behavior.
+
+        Note that `next_active_form` is a string that is the name of the form
+        that was specified when `add_form` or `register_form` was called.
         """
 
         self.on_start()
         #Why test for nonempty string? Why not just test boolean?
-        #Then any value for NEXT_ACTIVE_FORM which is False in a boolean
+        #Then any value for next_active_form which is False in a boolean
         #expression would stop loop
-        while self.NEXT_ACTIVE_FORM != "" and self.NEXT_ACTIVE_FORM is not None:
-            self._LAST_NEXT_ACTIVE_FORM = self._Forms[self.NEXT_ACTIVE_FORM]
-            self.LAST_ACTIVE_FORM_NAME = self.NEXT_ACTIVE_FORM
+        #while self.next_active_form != "" and self.next_active_form is not None:
+        while self.next_active_form:
+            self._last_active_form = self._forms[self.next_active_form]
+            #self.LAST_ACTIVE_FORM_NAME = self.next_active_form
             try:
-                Fm, args, kwargs = self._Forms[self.NEXT_ACTIVE_FORM]
-                self._THISFORM = Fm(parentApp = self, *args, **kwargs)
+                Fm, args, kwargs = self._forms[self.next_active_form]
+                self._THISFORM = Fm(parent_app=self, *args, **kwargs)
             except TypeError:
-                self._THISFORM = self._Forms[self.NEXT_ACTIVE_FORM]
-            self._THISFORM.FORM_NAME = self.NEXT_ACTIVE_FORM
-            self.ACTIVE_FORM_NAME = self.NEXT_ACTIVE_FORM
-            if len(self._FORM_VISIT_LIST) > 0:
-                if self._FORM_VISIT_LIST[-1] != self.NEXT_ACTIVE_FORM:
-                    self._FORM_VISIT_LIST.append(self.NEXT_ACTIVE_FORM)
+                self._THISFORM = self._forms[self.next_active_form]
+            self._THISFORM.FORM_NAME = self.next_active_form
+            self.ACTIVE_FORM_NAME = self.next_active_form
+            if len(self._form_visit_list) > 0:
+                if self._form_visit_list[-1] != self.next_active_form:
+                    self._form_visit_list.append(self.next_active_form)
             else:
-                self._FORM_VISIT_LIST.append(self.NEXT_ACTIVE_FORM)
+                self._form_visit_list.append(self.next_active_form)
             #self._THISFORM._resize()
             #I think checking for methods in classes like this is really weird
             #and unnecessary in most cases, but in this one I don't see a
@@ -236,7 +257,7 @@ class App(SimpleApp):
                 self._THISFORM.after_editing()
                 #if hasattr(self._THISFORM, "beforeEditing"):
                 #    self._THISFORM.beforeEditing()
-                #self._THISFORM._resize()
+                #self._THISFORM._resize()widgetClass
                 #self._THISFORM.edit()
                 #if hasattr(self._THISFORM, "afterEditing"):
                 #    self._THISFORM.afterEditing()

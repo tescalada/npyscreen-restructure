@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 import curses
-import _curses
+#import _curses  # unused
 
 #import curses.wrapper
 import locale
@@ -32,6 +32,7 @@ def wrapper_basic(call_function):
 #   curses.echo()
 #   curses.endwin()
 
+
 def wrapper(call_function, fork=None, reset=True):
     global _NEVER_RUN_INITSCR
     if fork:
@@ -43,6 +44,7 @@ def wrapper(call_function, fork=None, reset=True):
             wrapper_no_fork(call_function)
         else:
             wrapper_fork(call_function, reset=reset)
+
 
 def wrapper_fork(call_function, reset=True):
     pid = os.fork()
@@ -72,6 +74,7 @@ def wrapper_fork(call_function, reset=True):
 
 def external_reset():
     subprocess.call(['reset', '-Q'])
+
 
 def wrapper_no_fork(call_function, reset=False):
     global _NEVER_RUN_INITSCR

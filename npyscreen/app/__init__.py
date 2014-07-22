@@ -257,7 +257,7 @@ class App(SimpleApp):
                 self._THISFORM.after_editing()
                 #if hasattr(self._THISFORM, "beforeEditing"):
                 #    self._THISFORM.beforeEditing()
-                #self._THISFORM._resize()widgetClass
+                #self._THISFORM._resize()
                 #self._THISFORM.edit()
                 #if hasattr(self._THISFORM, "afterEditing"):
                 #    self._THISFORM.afterEditing()

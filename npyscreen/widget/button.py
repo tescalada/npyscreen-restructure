@@ -2,14 +2,14 @@
 
 import curses
 import locale
-from . import npysGlobalOptions as GlobalOptions
+from .. import global_options
 from . import wgwidget    as widget
 from . import wgcheckbox  as checkbox
 
 class MiniButton(checkbox._ToggleControl):
     def __init__(self, screen, name='Button', *args, **keywords):
         self.encoding = 'utf-8'
-        if GlobalOptions.ASCII_ONLY or locale.getpreferredencoding() == 'US-ASCII':
+        if global_options.ASCII_ONLY or locale.getpreferredencoding() == 'US-ASCII':
             self._force_ascii = True
         else:
             self._force_ascii = False
@@ -22,14 +22,14 @@ class MiniButton(checkbox._ToggleControl):
             self.color = 'CONTROL'
 
     def calculate_area_needed(self):
-        return 1, self.label_width+2
+        return 1, self.label_width + 2
 
     def update(self, clear=True):
-        if clear: self.clear()
+        if clear:
+            self.clear()
         if self.hidden:
             self.clear()
             return False
-
 
         if self.value and self.do_colors():
             self.parent.curses_pad.addstr(self.rely, self.relx, '>', self.parent.theme_manager.findPair(self))

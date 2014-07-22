@@ -6,7 +6,7 @@ import sys
 import locale
 #import curses.wrapper
 from . import wgwidget as widget
-from . import npysGlobalOptions as GlobalOptions
+from .. import global_options
 
 
 class TextfieldBase(widget.Widget):
@@ -21,7 +21,7 @@ class TextfieldBase(widget.Widget):
 
         super(TextfieldBase, self).__init__(screen, **keywords)
 
-        if GlobalOptions.ASCII_ONLY or locale.getpreferredencoding() == 'US-ASCII':
+        if global_options.ASCII_ONLY or locale.getpreferredencoding() == 'US-ASCII':
             self._force_ascii = True
         else:
             self._force_ascii = False

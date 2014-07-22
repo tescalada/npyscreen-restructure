@@ -1,24 +1,24 @@
 # encoding: utf-8
 
 from . import wgwidget    as widget
-from . import npysGlobalOptions as GlobalOptions
+from .. import global_options
 import locale
 import sys
 import curses
 import textwrap
 import re
-from functools import reduce
+#from functools import reduce
 
 
 class MultiLineEdit(widget.Widget):
     _SAFE_STRING_STRIPS_NL = False
-    def __init__(self, screen, autowrap=True, slow_scroll=True, scroll_exit=True, value=None, **keywords):
+    def __init__(self, screen, autowrap=True, slow_scroll=True, scroll_exit=True, value=None, **kwargs):
         self.value = value or ''
-        super(MultiLineEdit, self).__init__(screen, **keywords)
+        super(MultiLineEdit, self).__init__(screen, **kwargs)
         self.cursor_position = 0
-        self.start_display_at = 0 #Line number
+        self.start_display_at = 0  # Line number
 
-        self.maximum_display_width  = self.width - 1 # Leave room for cursor
+        self.maximum_display_width  = self.width - 1   # Leave room for cursor
         self.maximum_display_height = self.height
         self.slow_scroll = slow_scroll
         self.scroll_exit = scroll_exit
@@ -26,11 +26,10 @@ class MultiLineEdit(widget.Widget):
         self.autowrap = autowrap
         self.wrapon = re.compile("\s+|-+")
 
-        if GlobalOptions.ASCII_ONLY or locale.getpreferredencoding() == 'US-ASCII':
+        if global_options.ASCII_ONLY or locale.getpreferredencoding() == 'US-ASCII':
             self._force_ascii = True
         else:
             self._force_ascii = False
-
 
     def safe_filter(self, this_string):
         s = []

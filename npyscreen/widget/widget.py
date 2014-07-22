@@ -7,7 +7,7 @@ import curses
 import curses.ascii
 #import curses.wrapper
 import weakref
-from . import npysGlobalOptions as GlobalOptions
+from .. import global_options
 from . import wgwidget_proto
 import locale
 import warnings
@@ -214,7 +214,7 @@ class Widget(InputHandler, wgwidget_proto._LinePrinter):
         self.use_max_space = use_max_space
         self.color = color
         self.encoding = 'utf-8'#locale.getpreferredencoding()
-        if GlobalOptions.ASCII_ONLY or locale.getpreferredencoding() == 'US-ASCII':
+        if global_options.ASCII_ONLY or locale.getpreferredencoding() == 'US-ASCII':
             self._force_ascii = True
         else:
             self._force_ascii = False
@@ -270,7 +270,7 @@ class Widget(InputHandler, wgwidget_proto._LinePrinter):
 
     def do_colors(self):
         "Returns True if the widget should try to paint in coloour."
-        if curses.has_colors() and not GlobalOptions.DISABLE_ALL_COLORS:
+        if curses.has_colors() and not global_options.DISABLE_ALL_COLORS:
             return True
         else:
             return False
@@ -634,7 +634,7 @@ big a given widget is ... use .height and .width instead"""
                         return rtn_value.encode('ascii', 'replace')
                 return rtn_value
             # If not....
-            if not GlobalOptions.ASCII_ONLY:
+            if not global_options.ASCII_ONLY:
                 # is the string already unicode?
                 if isinstance(rtn_value, bytes):
                     # no it isn't.

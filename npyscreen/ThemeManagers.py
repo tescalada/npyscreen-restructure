@@ -1,15 +1,20 @@
 # encoding: utf-8
 
-"""IMPORTANT - COLOUR SUPPORT IS CURRENTLY EXTREMELY EXPERIMENTAL.  THE API MAY CHANGE, AND NO DEFAULT
-WIDGETS CURRENTLY TAKE ADVANTAGE OF THEME SUPPORT AT ALL."""
+"""
+IMPORTANT - COLOUR SUPPORT IS CURRENTLY EXTREMELY EXPERIMENTAL.  THE API MAY CHANGE, AND NO DEFAULT
+WIDGETS CURRENTLY TAKE ADVANTAGE OF THEME SUPPORT AT ALL.
+"""
 import curses
-from . import npysGlobalOptions
+from . import global_options
 
-def disableColor():
-    npysGlobalOptions.DISABLE_ALL_COLORS = True
 
-def enableColor():
-    npysGlobalOptions.DISABLE_ALL_COLORS = False
+def disable_color():
+    global_options.DISABLE_ALL_COLORS = True
+
+
+def enable_color():
+    global_options.DISABLE_ALL_COLORS = False
+
 
 class ThemeManager(object):
     _colors_to_define = (
@@ -56,10 +61,11 @@ class ThemeManager(object):
         'CAUTION'     : 'YELLOW_BLACK',
         'CAUTIONHL'   : 'BLACK_YELLOW',
     }
+
     def __init__(self):
         #curses.use_default_colors()
         self._defined_pairs = {}
-        self._names         = {}
+        self._names = {}
         try:
             self._max_pairs = curses.COLOR_PAIRS - 1
             do_color = True
@@ -67,18 +73,18 @@ class ThemeManager(object):
             # curses.start_color has failed or has not been called
             do_color = False
             # Disable all color use across the application
-            disableColor()
+            disable_color()
         if do_color and curses.has_colors():
             self.initialize_pairs()
             self.initialize_names()
 
-    def findPair(self, caller, request='DEFAULT'):
-        if not curses.has_colors() or npysGlobalOptions.DISABLE_ALL_COLORS:
+    def find_pair(self, caller, request='DEFAULT'):
+        if not curses.has_colors() or global_options.DISABLE_ALL_COLORS:
             return False
 
-        if request=='DEFAULT':
+        if request == 'DEFAULT':
             request = caller.color
-        # Locate the requested colour pair.  Default to default if not found.
+        # Locate the requested color pair.  Default to default if not found.
         try:
             pair = self._defined_pairs[self._names[request]]
         except:
@@ -89,7 +95,7 @@ class ThemeManager(object):
 
         return color_attribute
 
-    def setDefault(self, caller):
+    def set_default(self, caller):
         return False
 
     def initialize_pairs(self):
@@ -102,12 +108,13 @@ class ThemeManager(object):
             self.initalize_pair(cp[0], cp[1], cp[2])
 
     def initialize_names(self):
-           self._names.update(self.__class__.default_colors)
+        self._names.update(self.__class__.default_colors)
 
     def initalize_pair(self, name, fg, bg):
-        # Initialize a color_pair for the required colour and return the number. Raise an exception if this is not possible.
-        if (len(list(self._defined_pairs.keys()))+1) == self._max_pairs:
-            raise Exception("Too many colours")
+        #Initialize a color_pair for the required color and return the number.
+        #Raise an exception if this is not possible.
+        if (len(list(self._defined_pairs.keys())) + 1) == self._max_pairs:
+            raise Exception("Too many colors")
 
         _this_pair_number = len(list(self._defined_pairs.keys())) + 1
 

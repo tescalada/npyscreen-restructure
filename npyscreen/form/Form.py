@@ -8,20 +8,19 @@ from . import npyspmfuncs as pmfuncs
 #import Menu
 import curses
 import _curses
-from . import npysGlobalOptions
+from .. import global_options
 from . import wgwidget_proto
 from . import fm_form_edit_loop   as form_edit_loop
 from . import util_viewhelp
-from . import npysGlobalOptions as GlobalOptions
 from .globals import DISABLE_RESIZE_SYSTEM
 
 class _FormBase(proto_fm_screen_area.ScreenArea,
         widget.InputHandler,
         wgwidget_proto._LinePrinter):
-    BLANK_COLUMNS_RIGHT= 2
-    BLANK_LINES_BASE   = 2
-    OK_BUTTON_TEXT     = 'OK'
-    OK_BUTTON_BR_OFFSET = (2,6)
+    BLANK_COLUMNS_RIGHT = 2
+    BLANK_LINES_BASE = 2
+    OK_BUTTON_TEXT = 'OK'
+    OK_BUTTON_BR_OFFSET = (2, 6)
     OKBUTTON_TYPE = button.MiniButton
     DEFAULT_X_OFFSET = 2
     PRESERVE_SELECTED_WIDGET_DEFAULT = False # Preserve cursor location between displays?
@@ -47,7 +46,7 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
             self.framed = self.__class__.FRAMED
         else:
             self.framed = framed
-        self.name=name
+        self.name = name
         self.editing = False
         ## OLD MENU CODE REMOVED self.__menus  = []
         self._clear_all_widgets()
@@ -309,7 +308,7 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
 
     def display(self, clear=False):
         #APPLICATION_THEME_MANAGER.setTheme(self)
-        if curses.has_colors() and not npysGlobalOptions.DISABLE_ALL_COLORS:
+        if curses.has_colors() and not global_options.DISABLE_ALL_COLORS:
             self.curses_pad.attrset(0)
             color_attribute = self.theme_manager.findPair(self, self.color)
             self.curses_pad.bkgdset(' ', color_attribute)
@@ -354,7 +353,7 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
 
     def draw_form(self):
         if self.framed:
-            if curses.has_colors() and not GlobalOptions.DISABLE_ALL_COLORS:
+            if curses.has_colors() and not global_options.DISABLE_ALL_COLORS:
                 self.curses_pad.attrset(0)
                 self.curses_pad.bkgdset(' ', curses.A_NORMAL | self.theme_manager.findPair(self, self.color))
             self.curses_pad.border()

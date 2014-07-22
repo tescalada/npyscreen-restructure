@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 import curses
 from . import npysThemeManagers as ThemeManagers
 
@@ -19,7 +21,7 @@ class DefaultTheme(ThemeManagers.ThemeManager):
         'CAUTION'     : 'YELLOW_BLACK',
         'CAUTIONHL'   : 'BLACK_YELLOW',
     }
-    
+
 class ElegantTheme(ThemeManagers.ThemeManager):
     default_colors = {
         'DEFAULT'     : 'WHITE_BLACK',
@@ -79,7 +81,7 @@ class BlackOnWhiteTheme(ThemeManagers.ThemeManager):
     }
 
 class TransparentThemeDarkText(ThemeManagers.ThemeManager):
-    _colors_to_define = ( 
+    _colors_to_define = (
     ('BLACK_WHITE',      curses.COLOR_BLACK,      curses.COLOR_WHITE),
     ('BLUE_BLACK',       curses.COLOR_BLUE,       curses.COLOR_BLACK),
     ('CYAN_BLACK',       curses.COLOR_CYAN,       curses.COLOR_BLACK),
@@ -97,7 +99,7 @@ class TransparentThemeDarkText(ThemeManagers.ThemeManager):
     ('MAGENTA_WHITE',    curses.COLOR_MAGENTA,    curses.COLOR_WHITE),
     ('RED_WHITE',        curses.COLOR_RED,        curses.COLOR_WHITE),
     ('YELLOW_WHITE',     curses.COLOR_YELLOW,     curses.COLOR_WHITE),
-     
+
     ('BLACK_ON_DEFAULT',   curses.COLOR_BLACK,      -1),
     ('WHITE_ON_DEFAULT',   curses.COLOR_WHITE,      -1),
     ('BLUE_ON_DEFAULT',    curses.COLOR_BLUE,       -1),
@@ -130,7 +132,7 @@ class TransparentThemeDarkText(ThemeManagers.ThemeManager):
     def __init__(self, *args, **keywords):
         curses.use_default_colors()
         super(TransparentThemeDarkText, self).__init__(*args, **keywords)
-        
+
 class TransparentThemeLightText(TransparentThemeDarkText):
     default_colors = {
         'DEFAULT'     : 'WHITE_ON_DEFAULT',
@@ -149,4 +151,4 @@ class TransparentThemeLightText(TransparentThemeDarkText):
         'CAUTION'     : 'YELLOW_BLACK',
         'CAUTIONHL'   : 'BLACK_YELLOW',
     }
-    
+

@@ -1,4 +1,5 @@
-#!/usr/bin/python
+# encoding: utf-8
+
 from . import wgmultiline    as multiline
 from . import wgtextbox      as textbox
 from . import wgcheckbox     as checkbox
@@ -21,7 +22,7 @@ class TreeLine(textbox.TextfieldBase):
         self.safe_depth_display = False
         self.show_v_lines       = True
         super(TreeLine, self).__init__(*args, **keywords)
-        
+
     #EXPERIMENTAL
     def _print(self, left_margin=0):
         self.left_margin = left_margin
@@ -30,7 +31,7 @@ class TreeLine(textbox.TextfieldBase):
         if self.highlight:
             self.parent.curses_pad.bkgdset(' ',curses.A_STANDOUT)
         super(TreeLine, self)._print()
-        
+
     def _print_tree(self, real_x):
         if hasattr(self._tree_real_value, 'findDepth'):
             control_chars_added = 0
@@ -43,7 +44,7 @@ class TreeLine(textbox.TextfieldBase):
             if self._tree_ignore_root:
                 dp -= 1
             if dp: # > 0:
-                if dp < this_safe_depth_display:                    
+                if dp < this_safe_depth_display:
                     for i in range(dp-1):
                         if (i < _tree_depth_next) and (not self._tree_last_line): # was i+1 < # and not (_tree_depth_next==1):
                             if self.show_v_lines:
@@ -53,26 +54,26 @@ class TreeLine(textbox.TextfieldBase):
                                         self.parent.curses_pad.addch(self.rely+h+1, real_x, curses.ACS_VLINE, curses.A_NORMAL)
                             else:
                                 self.parent.curses_pad.addch(self.rely, real_x, ' ', curses.A_NORMAL)
-                                
+
                         else:
                             if self.show_v_lines:
                                 self.parent.curses_pad.addch(self.rely, real_x, curses.ACS_BTEE, curses.A_NORMAL)
-                                
+
                             else:
                                 self.parent.curses_pad.addch(self.rely, real_x, ' ', curses.A_NORMAL)
-                                
+
                         real_x +=1
                         self.parent.curses_pad.addch(self.rely, real_x, ord(' '), curses.A_NORMAL)
                         real_x +=1
-                    
-                    
-                    
+
+
+
                     if self._tree_sibling_next or _tree_depth_next > self._tree_depth:
                         self.parent.curses_pad.addch(self.rely, real_x, curses.ACS_LTEE, curses.A_NORMAL)
                         if self.height > 1:
                             for h in range(self.height-1):
                                 self.parent.curses_pad.addch(self.rely+h+1, real_x, curses.ACS_VLINE, curses.A_NORMAL)
-                    
+
                     else:
                         self.parent.curses_pad.addch(self.rely, real_x, curses.ACS_LLCORNER, curses.A_NORMAL)
                     real_x += 1
@@ -85,15 +86,15 @@ class TreeLine(textbox.TextfieldBase):
                     real_x += len(str(dp)) + 4
                     self.parent.curses_pad.addch(self.rely, real_x, curses.ACS_RTEE, curses.A_NORMAL)
                     real_x += 1
-                    
+
             if self._tree_has_children:
                 if self._tree_expanded:
                     self.parent.curses_pad.addch(self.rely, real_x, curses.ACS_TTEE, curses.A_NORMAL)
                     if self.height > 1:
                         for h in range(self.height-1):
                             self.parent.curses_pad.addch(self.rely+h+1, real_x, curses.ACS_VLINE, curses.A_NORMAL)
-                    
-                else:   
+
+                else:
                     self.parent.curses_pad.addch(self.rely, real_x, curses.ACS_RARROW, curses.A_NORMAL)
                 real_x +=1
             else:
@@ -103,16 +104,16 @@ class TreeLine(textbox.TextfieldBase):
         else:
             margin_needed = 0
         return margin_needed
-        
-        
+
+
     def display_value(self, vl):
         try:
             return self.safe_string(self._tree_real_value.getContentForDisplay())
         except:
             # Catch the times this is None.
             self.safe_string(vl)
-            
-    
+
+
 
 class TreeLineAnnotated(TreeLine):
     ## Experimental.
@@ -148,7 +149,7 @@ class TreeLineAnnotated(TreeLine):
         self.left_margin = 0
         self.parent.curses_pad.bkgdset(' ',curses.A_NORMAL)
         self.left_margin += self._print_tree(self.relx)
-        if self.do_colors():    
+        if self.do_colors():
             self.left_margin += self.annotationColor(self.left_margin+self.relx)
         else:
             self.left_margin += self.annotationNoColor(self.left_margin+self.relx)
@@ -159,7 +160,7 @@ class TreeLineAnnotated(TreeLine):
 
 class MLTree(multiline.MultiLine):
     # Experimental
-    
+
     #_contained_widgets = TreeLineAnnotated
     _contained_widgets = TreeLine
     def _setMyValues(self, tree):
@@ -172,22 +173,22 @@ class MLTree(multiline.MultiLine):
                 raise TypeError("MultiLineTree widget can only contain a NPSTreeData object in its values attribute")
         else:
             self._myFullValues = tree
-    
+
     def convertToTree(self, tree):
         "Override this function to convert a set of values to a tree."
         return None
-        
+
     def resize(self):
         super(MLTree, self).resize()
         self.clearDisplayCache()
         self.update(clear=True)
         self.display()
-    
+
     def clearDisplayCache(self):
         self._cached_tree = None
         self._cached_sort = None
         self._cached_tree_as_list = None
-    
+
     def _getApparentValues(self):
         try:
             if self._cached_tree is weakref.proxy(self._myFullValues) and \
@@ -199,24 +200,24 @@ class MLTree(multiline.MultiLine):
         self._cached_sort = (self._myFullValues.sort, self._myFullValues.sort_function)
         self._cached_tree_as_list = self._myFullValues.getTreeAsList()
         return self._cached_tree_as_list
-    
+
     def _walkMyValues(self):
         return self._myFullValues.walkTree()
-    
+
     def _delMyValues(self):
         self._myFullValues = None
-    
+
     values = property(_getApparentValues, _setMyValues, _delMyValues)
-    
+
     def filter_value(self, index):
         if self._filter in self.display_value(self.values[index].getContent()):
             return True
         else:
             return False
-    
+
     def display_value(self, vl):
         return vl
-    
+
     def set_up_handlers(self):
         super(MLTree, self).set_up_handlers()
         self.handlers.update({
@@ -227,13 +228,13 @@ class MLTree(multiline.MultiLine):
                 ord('{'): self.h_collapse_all,
                 ord('}'): self.h_expand_all,
                 ord('h'): self.h_collapse_tree,
-                ord('l'): self.h_expand_tree,                
+                ord('l'): self.h_expand_tree,
         })
 
-    
+
     def _before_print_lines(self):
         pass
-    
+
     def _set_line_values(self, line, value_indexer):
         line._tree_real_value   = None
         line._tree_depth        = False
@@ -260,7 +261,7 @@ class MLTree(multiline.MultiLine):
                     line._tree_sibling_next = True
                 else:
                     line._tree_sibling_next = False
-    
+
             except:
                 line._sibling_next = False
                 line._tree_last_line = True
@@ -273,7 +274,7 @@ class MLTree(multiline.MultiLine):
             self._set_line_blank(line)
         except TypeError:
             self._set_line_blank(line)
-            
+
     def h_collapse_tree(self, ch):
         if self.values[self.cursor_line].expanded and self.values[self.cursor_line].hasChildren():
             self.values[self.cursor_line].expanded = False
@@ -298,21 +299,21 @@ class MLTree(multiline.MultiLine):
                 v.expanded = True
         self._cached_tree = None
         self.display()
-    
+
     def h_collapse_all(self, ch):
         for v in self._myFullValues.walkTree(onlyExpanded=True):
             v.expanded = False
         self._cached_tree = None
         self.cursor_line = 0
         self.display()
-    
+
     def h_expand_all(self, ch):
         for v in self._myFullValues.walkTree(onlyExpanded=False):
             v.expanded    = True
         self._cached_tree = None
         self.cursor_line  = 0
         self.display()
-    
+
 class MLTreeAnnotated(MLTree):
     _contained_widgets = TreeLineAnnotated
 
@@ -338,18 +339,18 @@ class MultiLineTree(multiline.MultiLine):
             raise TypeError("MultiLineTree widget can only contain a NPSTreeData object in its values attribute")
         else:
             self._myFullValues = tree
-    
+
     def _getApparentValues(self):
         return self._myFullValues.getTreeAsList()
-    
+
     def _walkMyValues(self):
         return self._myFullValues.walkTree()
-    
+
     def _delMyValues(self):
         self._myFullValues = None
-    
+
     values = property(_getApparentValues, _setMyValues, _delMyValues)
-    
+
     def get_tree_display(self, vl):
         dp = vl.findDepth()
         if dp > 0:
@@ -359,12 +360,12 @@ class MultiLineTree(multiline.MultiLine):
         if vl.hasChildren():
             if vl.expanded:
                 control_chars = control_chars + "+"
-            else:   
+            else:
                 control_chars = control_chars + ">"
         else:
             control_chars = control_chars + ""
         return control_chars
-    
+
     def _set_line_values(self, line, value_indexer):
         try:
             line.value = self.get_tree_display(self.values[value_indexer]) + "  " + self.display_value(self.values[value_indexer]) + "  "
@@ -373,10 +374,10 @@ class MultiLineTree(multiline.MultiLine):
             self._set_line_blank(line)
         except TypeError:
             self._set_line_blank(line)
-    
+
     def display_value(self, vl):
-        return str(vl.getContentForDisplay()) 
-    
+        return str(vl.getContentForDisplay())
+
 class SelectOneTree(MultiLineTree):
     _contained_widgets = checkbox.RoundCheckBox
     def _print_line(self, line, value_indexer):
@@ -400,7 +401,7 @@ class SelectOneTree(MultiLineTree):
             line.hidden = True
 
         line.highlight= False
-    
+
     def update(self, clear=True):
         if self.hidden and clear:
             self.clear()
@@ -420,23 +421,23 @@ class SelectOneTree(MultiLineTree):
         try:
             self.value = [weakref.proxy(self.values[self.cursor_line]),]
         except TypeError:
-            # Actually, this is inefficient, since with the NPSTree class (default) we will always be here - since by default we will 
+            # Actually, this is inefficient, since with the NPSTree class (default) we will always be here - since by default we will
             # try to create a weakref to a weakref, and that will fail with a type-error.  BUT we are only doing it on a keypress, so
             # it shouldn't create a huge performance hit, and is future-proof. Code replicated in h_select_exit
             self.value = [self.values[self.cursor_line],]
-    
+
     def h_select_exit(self, ch):
         try:
             self.value = [weakref.proxy(self.values[self.cursor_line]),]
         except TypeError:
-            # Actually, this is inefficient, since with the NPSTree class (default) we will always be here - since by default we will 
+            # Actually, this is inefficient, since with the NPSTree class (default) we will always be here - since by default we will
             # try to create a weakref to a weakref, and that will fail with a type-error.  BUT we are only doing it on a keypress, so
             # it shouldn't create a huge performance hit, and is future-proof.
             self.value = [self.values[self.cursor_line],]
         if self.return_exit:
             self.editing = False
             self.how_exited=True
-            
+
     def h_set_filtered_to_selected(self, ch):
         if len(self._filtered_values_cache) < 2:
             self.value = self.get_filtered_values()
@@ -453,7 +454,7 @@ class SelectOneTree(MultiLineTree):
 
 class MultiLineTreeNew(multiline.MultiLine):
     # Experimental
-    
+
     _contained_widgets = TreeLineAnnotated
     #_contained_widgets = TreeLine
     def _setMyValues(self, tree):
@@ -466,16 +467,16 @@ class MultiLineTreeNew(multiline.MultiLine):
                 raise TypeError("MultiLineTree widget can only contain a NPSTreeData object in its values attribute")
         else:
             self._myFullValues = tree
-    
+
     def convertToTree(tree):
         "Override this function to convert a set of values to a tree."
         return None
-    
+
     def clearDisplayCache(self):
         self._cached_tree = None
         self._cached_sort = None
         self._cached_tree_as_list = None
-    
+
     def _getApparentValues(self):
         try:
             if self._cached_tree is weakref.proxy(self._myFullValues) and \
@@ -487,24 +488,24 @@ class MultiLineTreeNew(multiline.MultiLine):
         self._cached_sort = (self._myFullValues.sort, self._myFullValues.sort_function)
         self._cached_tree_as_list = self._myFullValues.getTreeAsList()
         return self._cached_tree_as_list
-    
+
     def _walkMyValues(self):
         return self._myFullValues.walkTree()
-    
+
     def _delMyValues(self):
         self._myFullValues = None
-    
+
     values = property(_getApparentValues, _setMyValues, _delMyValues)
-    
+
     def filter_value(self, index):
         if self._filter in self.display_value(self.values[index].getContent()):
             return True
         else:
             return False
-    
+
     #def display_value(self, vl):
     #    return vl
-    
+
     def set_up_handlers(self):
         super(MultiLineTreeNew, self).set_up_handlers()
         self.handlers.update({
@@ -515,18 +516,18 @@ class MultiLineTreeNew(multiline.MultiLine):
                 ord('{'): self.h_collapse_all,
                 ord('}'): self.h_expand_all,
                 ord('h'): self.h_collapse_tree,
-                ord('l'): self.h_expand_tree,                
+                ord('l'): self.h_expand_tree,
         })
 
-    
-    
+
+
     #def display_value(self, vl):
     #    return vl
-    
-    
+
+
     def _before_print_lines(self):
         pass
-    
+
     def _set_line_values(self, line, value_indexer):
         line._tree_real_value   = None
         line._tree_depth        = False
@@ -553,7 +554,7 @@ class MultiLineTreeNew(multiline.MultiLine):
                     line._tree_sibling_next = True
                 else:
                     line._tree_sibling_next = False
-    
+
             except:
                 line._sibling_next = False
                 line._tree_last_line = True
@@ -566,7 +567,7 @@ class MultiLineTreeNew(multiline.MultiLine):
             self._set_line_blank(line)
         except TypeError:
             self._set_line_blank(line)
-            
+
     def h_collapse_tree(self, ch):
         if self.values[self.cursor_line].expanded and self.values[self.cursor_line].hasChildren():
             self.values[self.cursor_line].expanded = False
@@ -591,14 +592,14 @@ class MultiLineTreeNew(multiline.MultiLine):
                 v.expanded = True
         self._cached_tree = None
         self.display()
-    
+
     def h_collapse_all(self, ch):
         for v in self._myFullValues.walkTree(onlyExpanded=True):
             v.expanded = False
         self._cached_tree = None
         self.cursor_line = 0
         self.display()
-    
+
     def h_expand_all(self, ch):
         for v in self._myFullValues.walkTree(onlyExpanded=False):
             v.expanded    = True

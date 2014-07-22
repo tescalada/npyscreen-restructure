@@ -1,4 +1,4 @@
-#encoding: utf-8
+# encoding: utf-8
 
 """
 The npyscreen.form package provides Form classes and utilities for creating

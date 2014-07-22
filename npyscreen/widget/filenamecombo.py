@@ -1,5 +1,8 @@
+# encoding: utf-8
+
 from . import fmFileSelector
 from . import wgcombobox
+
 
 class FilenameCombo(wgcombobox.ComboBox):
     def __init__(self, screen,
@@ -13,9 +16,9 @@ class FilenameCombo(wgcombobox.ComboBox):
         self.must_exist = must_exist
         self.confirm_if_exists = confirm_if_exists
         self.sort_by_extension = sort_by_extension
-        
+
         super(FilenameCombo, self).__init__(screen, *args, **keywords)
-        
+
     def _print(self):
         if self.value == None:
             printme = '- Unset -'
@@ -29,8 +32,6 @@ class FilenameCombo(wgcombobox.ComboBox):
         else:
             self.parent.curses_pad.addnstr(self.rely, self.relx, printme, self.width)
 
-    
-    
     def h_change_value(self, *args, **keywords):
         self.value = fmFileSelector.selectFile(
             starting_value = self.value,
@@ -42,7 +43,7 @@ class FilenameCombo(wgcombobox.ComboBox):
         if self.value == '':
             self.value = None
         self.display()
-        
+
 
 class TitleFilenameCombo(wgcombobox.TitleCombo):
     _entry_type = FilenameCombo

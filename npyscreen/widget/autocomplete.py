@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+# encoding: utf-8
+
+
 import curses
 from . import wgtextbox    as textbox
 from . import wgmultiline  as multiline
@@ -11,7 +13,7 @@ class Autocomplete(textbox.Textfield):
     """This class is fairly useless, but override auto_complete to change that.  See filename class for example"""
     def set_up_handlers(self):
         super(Autocomplete, self).set_up_handlers()
-        
+
         self.handlers.update({curses.ascii.TAB: self.auto_complete})
 
     def auto_complete(self, input):
@@ -19,11 +21,11 @@ class Autocomplete(textbox.Textfield):
 
     def get_choice(self, values):
         # If auto_complete needs the user to select from a list of values, this function lets them do that.
-        
+
         #tmp_window = Form.TitleForm(name=self.name, framed=True)
         tmp_window = Popup.Popup(name=self.name, framed=True)
-        sel = tmp_window.add_widget(multiline.MultiLine, 
-                values=values, 
+        sel = tmp_window.add_widget(multiline.MultiLine,
+                values=values,
                 value=self.value,
                 return_exit=True, select_exit=True)
         #sel = multiline.MultiLine(tmp_window, values=values, value=self.value)
@@ -42,12 +44,12 @@ class Filename(Autocomplete):
             dir, fname = os.path.split(self.value)
             # Let's have absolute paths.
             dir = os.path.abspath(dir)
-    
-            if self.value == '': 
+
+            if self.value == '':
                 self.value=dir
                 break
-    
-            try: 
+
+            try:
                 flist = os.listdir(dir)
             except:
                 self.show_brief_message("Can't read directory!")
@@ -78,7 +80,7 @@ class Filename(Autocomplete):
                 filelist = possibilities
             else:
                 filelist = flist #os.listdir(os.path.dirname(self.value))
-    
+
             filelist = list(map((lambda x: os.path.normpath(os.path.join(self.value, x))), filelist))
             files_only = []
             dirs_only = []
@@ -94,10 +96,10 @@ class Filename(Autocomplete):
 
                 if os.path.isdir(filelist[index1]):
                     dirs_only.append(filelist[index1])
-            
+
                 else:
                     files_only.append(filelist[index1])
-    
+
             dirs_only.sort()
             files_only.sort()
             combined_list = dirs_only + files_only

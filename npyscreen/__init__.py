@@ -1,11 +1,11 @@
-#!/usr/bin/python
+# encoding: utf-8
 
 from .globals                    import DEBUG, DISABLE_RESIZE_SYSTEM
 
 from .npyssafewrapper           import wrapper, wrapper_basic
 
 from   .npysThemeManagers       import ThemeManager, disableColor, enableColor
-from   . import npysThemes      as  Themes 
+from   . import npysThemes      as  Themes
 from   .apNPSApplication        import NPSApp
 from   .apNPSApplicationManaged import NPSAppManaged
 from   .proto_fm_screen_area    import setTheme

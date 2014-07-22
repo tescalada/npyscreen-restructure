@@ -1,5 +1,5 @@
-#!/usr/bin/env python
 # encoding: utf-8
+
 """IMPORTANT - COLOUR SUPPORT IS CURRENTLY EXTREMELY EXPERIMENTAL.  THE API MAY CHANGE, AND NO DEFAULT
 WIDGETS CURRENTLY TAKE ADVANTAGE OF THEME SUPPORT AT ALL."""
 import curses
@@ -12,7 +12,7 @@ def enableColor():
     npysGlobalOptions.DISABLE_ALL_COLORS = False
 
 class ThemeManager(object):
-    _colors_to_define = ( 
+    _colors_to_define = (
      # DO NOT DEFINE THIS COLOR - THINGS BREAK
      #('WHITE_BLACK',      DO_NOT_DO_THIS,      DO_NOT_DO_THIS),
      ('BLACK_WHITE',      curses.COLOR_BLACK,      curses.COLOR_WHITE),
@@ -27,7 +27,7 @@ class ThemeManager(object):
      ('BLACK_RED',        curses.COLOR_BLACK,      curses.COLOR_RED),
      ('BLACK_GREEN',      curses.COLOR_BLACK,      curses.COLOR_GREEN),
      ('BLACK_YELLOW',     curses.COLOR_BLACK,      curses.COLOR_YELLOW),
-     
+
      ('BLUE_WHITE',       curses.COLOR_BLUE,       curses.COLOR_WHITE),
      ('CYAN_WHITE',       curses.COLOR_CYAN,       curses.COLOR_WHITE),
      ('GREEN_WHITE',      curses.COLOR_GREEN,      curses.COLOR_WHITE),
@@ -35,7 +35,7 @@ class ThemeManager(object):
      ('RED_WHITE',        curses.COLOR_RED,        curses.COLOR_WHITE),
      ('YELLOW_WHITE',     curses.COLOR_YELLOW,     curses.COLOR_WHITE),
 )
-    
+
     default_colors = {
         'DEFAULT'     : 'WHITE_BLACK',
         'FORMDEFAULT' : 'WHITE_BLACK',
@@ -71,7 +71,7 @@ class ThemeManager(object):
         if do_color and curses.has_colors():
             self.initialize_pairs()
             self.initialize_names()
-        
+
     def findPair(self, caller, request='DEFAULT'):
         if not curses.has_colors() or npysGlobalOptions.DISABLE_ALL_COLORS:
             return False
@@ -86,12 +86,12 @@ class ThemeManager(object):
 
         # now make the actual attribute
         color_attribute = curses.color_pair(pair[0])
-        
+
         return color_attribute
-                
+
     def setDefault(self, caller):
         return False
-        
+
     def initialize_pairs(self):
         # White on Black is fixed as color_pair 0
         self._defined_pairs['WHITE_BLACK'] = (0, curses.COLOR_WHITE, curses.COLOR_BLACK)
@@ -100,22 +100,22 @@ class ThemeManager(object):
                 # silently protect the user from breaking things.
                 continue
             self.initalize_pair(cp[0], cp[1], cp[2])
-    
+
     def initialize_names(self):
            self._names.update(self.__class__.default_colors)
-    
+
     def initalize_pair(self, name, fg, bg):
         # Initialize a color_pair for the required colour and return the number. Raise an exception if this is not possible.
         if (len(list(self._defined_pairs.keys()))+1) == self._max_pairs:
             raise Exception("Too many colours")
-        
+
         _this_pair_number = len(list(self._defined_pairs.keys())) + 1
-        
+
         curses.init_pair(_this_pair_number, fg, bg)
-        
+
         self._defined_pairs[name] = (_this_pair_number, fg, bg)
-        
+
         return _this_pair_number
-        
+
     def get_pair_number(self, name):
         return self._defined_pairs[name][0]

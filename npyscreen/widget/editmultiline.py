@@ -1,4 +1,5 @@
-#!/usr/bin/python
+# encoding: utf-8
+
 from . import wgwidget    as widget
 from . import npysGlobalOptions as GlobalOptions
 import locale
@@ -7,6 +8,7 @@ import curses
 import textwrap
 import re
 from functools import reduce
+
 
 class MultiLineEdit(widget.Widget):
     _SAFE_STRING_STRIPS_NL = False
@@ -23,7 +25,7 @@ class MultiLineEdit(widget.Widget):
         self.encoding = locale.getpreferredencoding()
         self.autowrap = autowrap
         self.wrapon = re.compile("\s+|-+")
-        
+
         if GlobalOptions.ASCII_ONLY or locale.getpreferredencoding() == 'US-ASCII':
             self._force_ascii = True
         else:
@@ -42,7 +44,7 @@ class MultiLineEdit(widget.Widget):
                     s.append('?')
         s = ''.join(s)
         return s
-        
+
 
 
     def get_value_as_list(self, upto=None, keepends=False, useEncoding=True):
@@ -64,16 +66,16 @@ class MultiLineEdit(widget.Widget):
         """Translate cursor position from point in a str to y,x on in widget (you'll need to add in rely, relx yourself)"""
         if self.value == "": return 0,0
         position = y
-        if position == 0: 
+        if position == 0:
             return 0,0
         text_to_cursor = self.get_value_as_list(upto=position, keepends=True, useEncoding=False)
         y = (len(text_to_cursor))-1
         x = len(text_to_cursor[-1])
-        if text_to_cursor[-1][-1] == '\n': 
+        if text_to_cursor[-1][-1] == '\n':
             y += 1
             x = 0
         return y, x
-            
+
     def calculate_area_needed(self):
         return 0,0
 
@@ -87,34 +89,34 @@ class MultiLineEdit(widget.Widget):
         if self.cursor_position > len(self.value): self.cursor_position = len(self.value)
 
         self.cursory, self.cursorx = self.translate_cursor(self.cursor_position)
-    
+
         if self.editing:
             if self.slow_scroll:
                 if self.cursory > self.start_display_at+display_length-1:
-                    self.start_display_at = self.cursory - (display_length-1) 
+                    self.start_display_at = self.cursory - (display_length-1)
 
                 if self.cursory < self.start_display_at:
                     self.start_display_at = self.cursory
-            
+
             else:
                 if self.cursory > self.start_display_at+(display_length-1):
                     self.start_display_at = self.cursory
 
                 if self.cursory < self.start_display_at:
                     self.start_display_at = self.cursory - (display_length-1)
-            
+
             if self.start_display_at < 0:
                 self.start_display_at=0
 
             if self.cursorx > display_width:
                 xdisplay_offset = self.cursorx - display_width
-        
+
         max_display = len(text_to_display[self.start_display_at:])
 
         for line_counter in range(self.height):
-            if line_counter >= len(text_to_display)-self.start_display_at: 
+            if line_counter >= len(text_to_display)-self.start_display_at:
                 break
-            
+
             line_to_display = text_to_display[self.start_display_at+line_counter][xdisplay_offset:]
             line_to_display = self.safe_string(line_to_display)
             if isinstance(line_to_display, bytes):
@@ -130,28 +132,28 @@ class MultiLineEdit(widget.Widget):
                                            # change this when actually have a function to do this
                 if column - 1 + width_of_char_to_print > display_width:
                     break
-                
+
                 if self.do_colors():
                     color = self.parent.theme_manager.findPair(self)
                 else:
                     color = curses.A_NORMAL
-                
-                self.parent.curses_pad.addstr(self.rely+line_counter,self.relx+column, 
-                    self._print_unicode_char(line_to_display[place_in_string]), 
+
+                self.parent.curses_pad.addstr(self.rely+line_counter,self.relx+column,
+                    self._print_unicode_char(line_to_display[place_in_string]),
                     color
                     )
                 column += width_of_char_to_print
                 place_in_string += 1
-                
+
             # This needs altering using the methods from the textbox class
             # to properly deal with unicode.
-            
+
             #if self.do_colors():
-            #    self.parent.curses_pad.addnstr(self.rely+line_counter, self.relx, 
+            #    self.parent.curses_pad.addnstr(self.rely+line_counter, self.relx,
             #        text_to_display[self.start_display_at+line_counter][xdisplay_offset:], display_width,
             #        self.parent.theme_manager.findPair(self))
             #else:
-            #    self.parent.curses_pad.addnstr(self.rely+line_counter, self.relx, 
+            #    self.parent.curses_pad.addnstr(self.rely+line_counter, self.relx,
             #        text_to_display[self.start_display_at+line_counter][xdisplay_offset:], display_width)
             #
 
@@ -171,14 +173,14 @@ class MultiLineEdit(widget.Widget):
                     char_under_cur = ' '
             except:
                 char_under_cur = ' '
-            
+
             if self.do_colors():
-                self.parent.curses_pad.addstr(self.rely + _cur_y - self.start_display_at, _cur_x - xdisplay_offset + self.relx, char_under_cur, 
+                self.parent.curses_pad.addstr(self.rely + _cur_y - self.start_display_at, _cur_x - xdisplay_offset + self.relx, char_under_cur,
                                                 self.parent.theme_manager.findPair(self) | curses.A_STANDOUT)
-                
+
             else:
                 self.parent.curses_pad.addstr(self.rely + _cur_y - self.start_display_at, _cur_x - xdisplay_offset + self.relx, char_under_cur, curses.A_STANDOUT)
-            
+
     def _print_unicode_char(self, ch):
         # return the ch to print.  For python 3 this is just ch
         if self._force_ascii:
@@ -201,7 +203,7 @@ class MultiLineEdit(widget.Widget):
         #           word),
         #          text.split(' ')
         #         )
-        
+
         width=self.maximum_display_width
         text = self.value
         lines = []
@@ -226,8 +228,8 @@ class MultiLineEdit(widget.Widget):
     def full_reformat(self, *args):
         w = DocWrapper(width=self.maximum_display_width)
         self.value = w.fill(self.value)
-        
-        
+
+
     #def handle_mouse_event(self, mouse_event):
         # unfinished
         #mouse_id, x, y, z, bstate = mouse_event
@@ -236,14 +238,14 @@ class MultiLineEdit(widget.Widget):
         #self.cursor_position = rel_mouse_x + self.begin_at
         #self.display()
 
-        
+
     ######################################################################
     def set_up_handlers(self):
-        super(MultiLineEdit, self).set_up_handlers()    
-    
+        super(MultiLineEdit, self).set_up_handlers()
+
         # For OS X
         del_key = curses.ascii.alt('~')
-        
+
         self.handlers.update({
                    curses.ascii.NL:    self.h_add_nl,
                    curses.ascii.CR:    self.h_add_nl,
@@ -257,7 +259,7 @@ class MultiLineEdit(widget.Widget):
                    curses.KEY_BACKSPACE: self.h_delete_left,
                    "^R":           self.full_reformat,
                    # mac os x curses reports DEL as escape oddly
-                   # no solution yet                   
+                   # no solution yet
                    #"^K":          self.h_erase_right,
                    #"^U":          self.h_erase_left,
             })
@@ -268,7 +270,7 @@ class MultiLineEdit(widget.Widget):
                     # (self.t_is_cu, self.h_erase_left),
                         ))
 
-    
+
     def h_addch(self, inp):
         if self.editable:
             if self._last_get_ch_was_unicode == True and isinstance(self.value, bytes):
@@ -289,14 +291,14 @@ class MultiLineEdit(widget.Widget):
             return False
         if self.autowrap:
             self.reformat_preserve_nl()
-    
+
     def t_input_isprint(self, inp):
         if self._last_get_ch_was_unicode and inp not in '\n\t\r':
             return True
         if curses.ascii.isprint(inp) and \
-        (chr(inp) not in '\n\t\r'): 
+        (chr(inp) not in '\n\t\r'):
             return True
-        
+
         else: return False
 
     def h_addch_disabled(self, input):
@@ -305,17 +307,17 @@ class MultiLineEdit(widget.Widget):
         self.value = self.value[:self.cursor_position] + chr(input) \
             + self.value[self.cursor_position:]
         self.cursor_position += len(chr(input))
-        
+
         if self.autowrap:
             self.reformat_preserve_nl()
 
-    
+
     def h_line_down(self, input):
-        end_this_line = self.value.find("\n", self.cursor_position) 
+        end_this_line = self.value.find("\n", self.cursor_position)
         if end_this_line == -1:
-            if self.scroll_exit: 
+            if self.scroll_exit:
                 self.h_exit_down(None)
-            else: 
+            else:
                 self.cursor_position = len(self.value)
         else:
             self.cursor_position = end_this_line + 1
@@ -326,10 +328,10 @@ class MultiLineEdit(widget.Widget):
                     break
                 else:
                     self.cursor_position += 1
-            
+
 
     def h_line_up(self, input):
-        end_last_line = self.value.rfind("\n", 0, self.cursor_position) 
+        end_last_line = self.value.rfind("\n", 0, self.cursor_position)
         if end_last_line == -1:
             if self.scroll_exit: self.h_exit_up(None)
             else: self.cursor_position = 0
@@ -339,19 +341,19 @@ class MultiLineEdit(widget.Widget):
             else: start_last_line += 1
             if end_last_line - start_last_line <= self.cursorx:
                 self.cursor_position = end_last_line
-            else: 
-                self.cursor_position = start_last_line + self.cursorx 
+            else:
+                self.cursor_position = start_last_line + self.cursorx
                 if self.value[self.cursor_position] == "\n":
-                    self.cursor_position += 1 
+                    self.cursor_position += 1
     # Bug somewhere here when dealing with empty lines.
     def h_add_nl(self, input):
         self.value = self.value[:self.cursor_position] + "\n" + self.value[self.cursor_position:]
         self.cursor_position += 1
 
     def h_cursor_left(self, input):
-        if self.cursor_position > 0: 
+        if self.cursor_position > 0:
             self.cursor_position -= 1
-        
+
 
     def h_cursor_right(self, input):
         self.cursor_position += 1
@@ -359,7 +361,7 @@ class MultiLineEdit(widget.Widget):
     def h_delete_left(self, input):
         if self.editable and self.cursor_position > 0:
             self.value = self.value[:self.cursor_position-1] + self.value[self.cursor_position:]
-        
+
         self.cursor_position -= 1
 
     def h_delete_right(self, input):
@@ -392,4 +394,4 @@ class DocWrapper(textwrap.TextWrapper):
                 wrapped_lines.extend(textwrap.TextWrapper.wrap(self, para))
         return wrapped_lines
 
-        
+

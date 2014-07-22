@@ -1,4 +1,4 @@
-#!/usr/bin/env pyton
+# encoding: utf-8
 
 from . import wgcheckbox
 import weakref
@@ -12,16 +12,16 @@ class FormControlCheckbox(wgcheckbox.Checkbox):
     def addVisibleWhenSelected(self, w):
         """Add a widget to be visible only when this box is selected"""
         self._register(w, vws=True)
-    
+
     def addInvisibleWhenSelected(self, w):
         self._register(w, vws=False)
-        
+
     def _register(self, w, vws=True):
         if vws:
             working_list = self._visibleWhenSelected
         else:
             working_list = self._notVisibleWhenSelected
-            
+
         if w in working_list:
             pass
         else:
@@ -29,9 +29,9 @@ class FormControlCheckbox(wgcheckbox.Checkbox):
                 working_list.append(weakref.proxy(w))
             except TypeError:
                 working_list.append(w)
-        
+
         self.updateDependents()
-    
+
     def updateDependents(self):
         # This doesn't yet work.
         if self.value:
@@ -53,6 +53,6 @@ class FormControlCheckbox(wgcheckbox.Checkbox):
     def h_toggle(self, *args):
         super(FormControlCheckbox, self).h_toggle(*args)
         self.updateDependents()
-        
 
-        
+
+

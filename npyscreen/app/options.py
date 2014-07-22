@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 import weakref
 #import textwrap  # unused
 import datetime

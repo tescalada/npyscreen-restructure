@@ -1,9 +1,12 @@
+# encoding: utf-8
+
 from . import wgmultiline  as multiline
 from . import wgcheckbox   as checkbox
 
+
 class SelectOne(multiline.MultiLine):
     _contained_widgets = checkbox.RoundCheckBox
-    
+
     def update(self, clear=True):
         if self.hidden:
             self.clear()
@@ -14,11 +17,11 @@ class SelectOne(multiline.MultiLine):
                 self.value = [self.value, ]
             else:
                 self.value = []
-                
+
         super(SelectOne, self).update(clear=clear)
 
     def h_select(self, ch):
-        self.value = [self.cursor_line,]
+        self.value = [self.cursor_line]
 
     def _print_line(self, line, value_indexer):
         try:
@@ -40,19 +43,17 @@ class SelectOne(multiline.MultiLine):
                     line.show_bold = False
                     line.name = display_this
                     line.value = False
-                    
+
             if value_indexer in self._filtered_values_cache:
                 line.important = True
             else:
                 line.important = False
-            
-            
+
         except IndexError:
             line.name = None
             line.hide = True
 
-        line.highlight= False
-        
+        line.highlight = False
+
 class TitleSelectOne(multiline.TitleMultiLine):
     _entry_type = SelectOne
-    

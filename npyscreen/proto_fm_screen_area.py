@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# encoding: utf-8
 
 import curses
 import curses.panel
@@ -35,24 +35,24 @@ class ScreenArea(object):
     DEFAULT_COLUMNS    = 0
     SHOW_ATX           = 0
     SHOW_ATY           = 0
-    
+
     """A screen area that can be safely resized.  But this is a low-level class, not the
     object you are looking for."""
 
-    def __init__(self, lines=0, columns=0, 
+    def __init__(self, lines=0, columns=0,
             minimum_lines = 24,
             minimum_columns = 80,
-            show_atx = 0, 
+            show_atx = 0,
             show_aty = 0,
              **keywords):
 
-        
+
     # Putting a default in here will override the system in _create_screen. For testing?
         if not lines:
             lines = self.__class__.DEFAULT_LINES
         if not columns:
             columns = self.__class__.DEFAULT_COLUMNS
-            
+
         if lines:   minimum_lines   = lines
         if columns: minimum_columns = columns
 
@@ -70,30 +70,30 @@ class ScreenArea(object):
         self.show_atx = show_atx or self.__class__.SHOW_ATX
         self.show_aty = show_aty or self.__class__.SHOW_ATY
         self.ALL_SHOWN = False
-        
+
         global APPLICATION_THEME_MANAGER
         if APPLICATION_THEME_MANAGER is None:
             self.theme_manager = ThemeManagers.ThemeManager()
         else:
             self.theme_manager = APPLICATION_THEME_MANAGER
-        
+
         self.keypress_timeout = None
-        
+
 
         self._create_screen()
 
     def _create_screen(self):
-    
+
         try:
             if self.lines_were_auto_set: self.lines = None
             if self.cols_were_auto_set: self.columns = None
         except: pass
 
-        
-        if not self.lines: 
+
+        if not self.lines:
             self.lines = self._max_physical()[0]+1
             self.lines_were_auto_set = True
-        if not self.columns: 
+        if not self.columns:
             self.columns = self._max_physical()[1]+1
             self.cols_were_auto_set = True
 
@@ -132,16 +132,16 @@ class ScreenArea(object):
         #mxy, mxx = self.lines, self.columns-1
         mxy, mxx = self.useable_space(rely=rely, relx=relx)
         return (mxy-self.BLANK_LINES_BASE, mxx-self.BLANK_COLUMNS_RIGHT)
-    
+
     def refresh(self):
         pmfuncs.hide_cursor()
         _my, _mx = self._max_physical()
         self.curses_pad.move(0,0)
-        
+
         # Since we can have pannels larger than the screen
         # let's allow for scrolling them
-        
-        # Getting strange errors on OS X, with curses sometimes crashing at this point. 
+
+        # Getting strange errors on OS X, with curses sometimes crashing at this point.
         # Suspect screen size not updated in time. This try: seems to solve it with no ill effects.
         try:
             self.curses_pad.refresh(self.show_from_y,self.show_from_x,self.show_aty,self.show_atx,_my,_mx)
@@ -155,7 +155,7 @@ class ScreenArea(object):
 
         else:
             self.ALL_SHOWN = False
-    
+
     def erase(self):
         self.curses_pad.erase()
         self.refresh()

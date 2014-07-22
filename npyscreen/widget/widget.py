@@ -1,4 +1,5 @@
-#!/usr/bin/python
+# encoding: utf-8
+
 import codecs
 import copy
 import sys
@@ -14,17 +15,18 @@ import warnings
 from .globals import DEBUG
 
 
-EXITED_DOWN  =  1
-EXITED_UP    = -1
-EXITED_LEFT  = -2
-EXITED_RIGHT =  2
-EXITED_ESCAPE= 127
+EXITED_DOWN = 1
+EXITED_UP = -1
+EXITED_LEFT = -2
+EXITED_RIGHT = 2
+EXITED_ESCAPE = 127
 EXITED_MOUSE = 130
 
-SETMAX       = 'SETMAX'
-RAISEERROR   = 'RAISEERROR'
+SETMAX = 'SETMAX'
+RAISEERROR = 'RAISEERROR'
 
 ALLOW_NEW_INPUT = True
+
 
 class NotEnoughSpaceForWidget(Exception):
     pass
@@ -34,31 +36,37 @@ class InputHandler(object):
     "An object that can handle user input"
 
     def handle_input(self, _input):
-        """Returns True if input has been dealt with, and no further action needs taking.
-        First attempts to look up a method in self.input_handers (which is a dictionary), then
-        runs the methods in self.complex_handlers (if any), which is an array of form (test_func, dispatch_func).
-        If test_func(input) returns true, then dispatch_func(input) is called. Check to see if parent can handle.
-        No further action taken after that point."""
-        
+        """
+        Returns True if input has been dealt with, and no further action needs
+        taking.
+
+        First attempts to look up a method in self.input_handers (which is a
+        dictionary), then runs the methods in self.complex_handlers (if any),
+        which is an array of form (test_func, dispatch_func).
+
+        If test_func(input) returns true, then dispatch_func(input) is called.
+        Check to see if parent can handle.
+        No further action taken after that point.
+        """
+
         if _input in self.handlers:
             self.handlers[_input](_input)
             return True
-        
+
         try:
             _unctrl_input = curses.ascii.unctrl(_input)
         except TypeError:
             _unctrl_input = None
-        
+
         if _unctrl_input and (_unctrl_input in self.handlers):
             self.handlers[_unctrl_input](_input)
             return True
 
-
-        if not hasattr(self, 'complex_handlers'): 
+        if not hasattr(self, 'complex_handlers'):
             return False
         else:
             for test, handler in self.complex_handlers:
-                if test(_input) is not False: 
+                if test(_input) is not False:
                     handler(_input)
                     return True
         if hasattr(self, 'parent_widget') and hasattr(self.parent_widget, 'handle_input'):
@@ -70,7 +78,7 @@ class InputHandler(object):
 
         else:
             pass
-    # If we've got here, all else has failed, so:
+    #If we've got here, all else has failed, so:
         return False
 
     def set_up_handlers(self):
@@ -95,9 +103,13 @@ but in most cases the add_handers or add_complex_handlers methods are what you w
         self.complex_handlers = []
 
     def add_handlers(self, handler_dictionary):
-        """Update the dictionary of simple handlers.  Pass in a dictionary with keyname (eg "^P" or curses.KEY_DOWN) as the key, and the function that key should call as the values """
+        """
+        Update the dictionary of simple handlers. Pass in a dictionary with
+        keyname (eg "^P" or curses.KEY_DOWN) as the key, and the function that
+        key should call as the values
+        """
         self.handlers.update(handler_dictionary)
-    
+
     def add_complex_handlers(self, handlers_list):
         """add complex handlers: format of the list is pairs of
         (test_function, callback) sets"""
@@ -105,7 +117,7 @@ but in most cases the add_handers or add_complex_handlers methods are what you w
         for pair in handlers_list:
             assert len(pair) == 2
         self.complex_handlers.extend(handlers_list)
-        
+
     def remove_complex_handler(self, test_function):
         _new_list = []
         for pair in self.complex_handlers:
@@ -113,14 +125,16 @@ but in most cases the add_handers or add_complex_handlers methods are what you w
                 _new_list.append(pair)
         self.complex_handlers = _new_list
 
-###########################################################################################
+################################################################################
 # Handler Methods here - npc convention - prefix with h_
 
     def h_exit_down(self, _input):
-        """Called when user leaves the widget to the next widget"""
+        """
+        Called when user leaves the widget to the next widget
+        """
         self.editing = False
         self.how_exited = EXITED_DOWN
-        
+
     def h_exit_right(self, _input):
         self.editing = False
         self.how_exited = EXITED_RIGHT
@@ -129,11 +143,11 @@ but in most cases the add_handers or add_complex_handlers methods are what you w
         """Called when the user leaves the widget to the previous widget"""
         self.editing = False
         self.how_exited = EXITED_UP
-        
+
     def h_exit_left(self, _input):
         self.editing = False
         self.how_exited = EXITED_LEFT
-        
+
     def h_exit_escape(self, _input):
         self.editing = False
         self.how_exited = EXITED_ESCAPE
@@ -149,22 +163,23 @@ but in most cases the add_handers or add_complex_handlers methods are what you w
                 assert ch == curses.KEY_MOUSE
             self.editing = False
             self.how_exited = EXITED_MOUSE
-    
-
 
 
 class Widget(InputHandler, wgwidget_proto._LinePrinter):
-    "A base class for widgets. Do not use directly"
-    
+    """A base class for widgets. Do not use directly"""
+
     _SAFE_STRING_STRIPS_NL = True
-    
+
     def destroy(self):
-        """Destroy the widget: methods should provide a mechanism to destroy any references that might
-        case a memory leak.  See select. module for an example"""
+        """
+        Destroy the widget: methods should provide a mechanism to destroy any
+        references that might case a memory leak.
+
+        See select. module for an example"""
         pass
-        
-    def __init__(self, screen, 
-            relx=0, rely=0, name=None, value=None, 
+
+    def __init__(self, screen,
+            relx=0, rely=0, name=None, value=None,
             width = False, height = False,
             max_height = False, max_width=False,
             editable=True,
@@ -173,7 +188,7 @@ class Widget(InputHandler, wgwidget_proto._LinePrinter):
             use_max_space=False,
             check_value_change=True,
             check_cursor_move=True,
-            **keywords):
+            **kwargs):
         """The following named arguments may be supplied:
         name= set the name of the widget.
         width= set the width of the widget.
@@ -203,10 +218,10 @@ class Widget(InputHandler, wgwidget_proto._LinePrinter):
             self._force_ascii = True
         else:
             self._force_ascii = False
-        
-        
+
+
         self.set_up_handlers()
-        
+
         # To allow derived classes to set this and then call this method safely...
         try:
             self.value
@@ -218,7 +233,7 @@ class Widget(InputHandler, wgwidget_proto._LinePrinter):
             self.name
         except:
             self.name=name
-            
+
         self.request_width =  width     # widgets should honour if possible
         self.request_height = height    # widgets should honour if possible
 
@@ -228,11 +243,11 @@ class Widget(InputHandler, wgwidget_proto._LinePrinter):
         self.set_size()
 
         self.editing = False        # Change to true during an edit
-        
+
         self.editable = editable
         if self.parent.curses_pad.getmaxyx()[0]-1 == self.rely: self.on_last_line = True
         else: self.on_last_line = False
-    
+
     def _resize(self):
         "Internal Method. This will be the method called when the terminal resizes."
         self._recalculate_size()
@@ -240,26 +255,26 @@ class Widget(InputHandler, wgwidget_proto._LinePrinter):
         else: self.on_last_line = False
         self.resize()
         self.when_resized()
-    
+
     def resize(self):
         "Widgets should override this to control what should happen when they are resized."
         pass
-        
+
     def _recalculate_size(self):
         return self.set_size()
-    
+
     def when_resized(self):
         # this method is called when the widget has been resized.
         pass
-    
-        
+
+
     def do_colors(self):
         "Returns True if the widget should try to paint in coloour."
         if curses.has_colors() and not GlobalOptions.DISABLE_ALL_COLORS:
             return True
         else:
             return False
-        
+
     def space_available(self):
         """The space available left on the screen, returned as rows, columns"""
         if self.use_max_space:
@@ -268,7 +283,7 @@ class Widget(InputHandler, wgwidget_proto._LinePrinter):
             y, x = self.parent.widget_useable_space(self.rely, self.relx)
         return y,x
 
-    def calculate_area_needed(self): 
+    def calculate_area_needed(self):
         """Classes should provide a function to
 calculate the screen area they need, returning either y,x, or 0,0 if
 they want all the screen they can.  However, do not use this to say how
@@ -280,7 +295,7 @@ big a given widget is ... use .height and .width instead"""
         my, mx = self.space_available()
         #my = my+1 # Probably want to remove this.
         ny, nx = self.calculate_area_needed()
-        
+
         max_height = self.max_height
         max_width  = self.max_width
         # What to do if max_height or max_width is negative
@@ -288,46 +303,46 @@ big a given widget is ... use .height and .width instead"""
             max_height = my + max_height
         if max_width not in (None, False) and max_width < 0:
             max_width = mx + max_width
-            
+
         if max_height not in (None, False) and max_height <= 0:
-            raise NotEnoughSpaceForWidget("Not enough space for requested size")  
+            raise NotEnoughSpaceForWidget("Not enough space for requested size")
         if max_width not in (None, False) and max_width <= 0:
             raise NotEnoughSpaceForWidget("Not enough space for requested size")
-        
+
         if ny > 0:
-            if my >= ny: 
+            if my >= ny:
                 self.height = ny
-            else: 
+            else:
                 self.height = RAISEERROR
         elif max_height:
-            if max_height <= my: 
+            if max_height <= my:
                 self.height = max_height
-            else: 
+            else:
                 self.height = self.request_height
-        else: 
+        else:
             self.height = (self.request_height or my)
-        
+
         #if mx <= 0 or my <= 0:
         #    raise Exception("Not enough space for widget")
 
 
         if nx > 0:                 # if a minimum space is specified....
-            if mx >= nx:           # if max width is greater than needed space 
+            if mx >= nx:           # if max width is greater than needed space
                 self.width = nx    # width is needed space
-            else: 
+            else:
                 self.width = RAISEERROR    # else raise an error
         elif self.max_width:       # otherwise if a max width is speciied
-            if max_width <= mx: 
+            if max_width <= mx:
                 self.width = max_width
-            else: 
+            else:
                 self.width = RAISEERROR
-        else: 
+        else:
             self.width = self.request_width or mx
 
         if self.height == RAISEERROR or self.width == RAISEERROR:
             # Not enough space for widget
             raise NotEnoughSpaceForWidget("Not enough space: max y and x = %s , %s. Height and Width = %s , %s " % (my, mx, self.height, self.width) ) # unsafe. Need to add error here.
-    
+
     def update(self, clear=True):
         """How should object display itself on the screen. Define here, but do not actually refresh the curses
         display, since this should be done as little as possible.  This base widget puts nothing on screen."""
@@ -389,7 +404,7 @@ big a given widget is ... use .height and .width instead"""
             self.get_and_use_key_press()
         if _i_set_parent_editing:
             self.parent.editing = False
-        
+
         if self.editing:
             self.editing    = False
             self.how_exited = True
@@ -397,17 +412,17 @@ big a given widget is ... use .height and .width instead"""
     def _post_edit(self):
         self.highlight = 0
         self.update()
-        
+
     def _get_ch(self):
         #try:
         #    # Python3.3 and above - returns unicode
         #    ch = self.parent.curses_pad.get_wch()
         #    self._last_get_ch_was_unicode = True
         #except AttributeError:
-            
+
         # For now, disable all attempt to use get_wch()
         # but everything that follows could be in the except clause above.
-        
+
             # Try to read utf-8 if possible.
         _stored_bytes =[]
         self._last_get_ch_was_unicode = True
@@ -423,28 +438,28 @@ big a given widget is ... use .height and .width instead"""
                 self._last_get_ch_was_unicode = False
                 return rtn_ch
             # if we are here, we need to read 1, 2 or 3 more bytes.
-            # all of the subsequent bytes should be in the range 128 - 191, 
+            # all of the subsequent bytes should be in the range 128 - 191,
             # but we'll risk not checking...
-            elif 194 <= ch <= 223: 
+            elif 194 <= ch <= 223:
                     # 2 bytes
                     _stored_bytes.append(ch)
                     _stored_bytes.append(self.parent.curses_pad.getch())
-            elif 224 <= ch <= 239: 
-                    # 3 bytes 
+            elif 224 <= ch <= 239:
+                    # 3 bytes
                     _stored_bytes.append(ch)
-                    _stored_bytes.append(self.parent.curses_pad.getch()) 
-                    _stored_bytes.append(self.parent.curses_pad.getch()) 
-            elif 240 <= ch <= 244: 
-                    # 4 bytes 
-                    _stored_bytes.append(ch) 
-                    _stored_bytes.append(self.parent.curses_pad.getch()) 
-                    _stored_bytes.append(self.parent.curses_pad.getch()) 
+                    _stored_bytes.append(self.parent.curses_pad.getch())
+                    _stored_bytes.append(self.parent.curses_pad.getch())
+            elif 240 <= ch <= 244:
+                    # 4 bytes
+                    _stored_bytes.append(ch)
+                    _stored_bytes.append(self.parent.curses_pad.getch())
+                    _stored_bytes.append(self.parent.curses_pad.getch())
                     _stored_bytes.append(self.parent.curses_pad.getch())
             elif ch >= 245:
                 # probably a control character
                 self._last_get_ch_was_unicode = False
                 return ch
-            
+
             if sys.version_info[0] >= 3:
                 ch = bytes(_stored_bytes).decode('utf-8', errors='strict')
             else:
@@ -453,7 +468,7 @@ big a given widget is ... use .height and .width instead"""
         else:
             ch = self.parent.curses_pad.getch()
             self._last_get_ch_was_unicode = False
-        
+
         # This line should not be in the except clause.
         return ch
 
@@ -465,8 +480,8 @@ big a given widget is ... use .height and .width instead"""
                 self.parent.parentApp._internal_adjust_widgets()
             if hasattr(self.parent.parentApp, "adjust_widgets"):
                 self.parent.parentApp.adjust_widgets()
-            
-    
+
+
     def try_while_waiting(self):
         if hasattr(self.parent, "while_waiting"):
             self.parent.while_waiting()
@@ -494,20 +509,20 @@ big a given widget is ... use .height and .width instead"""
             #self.parent.curses_pad.timeout(1)
             self.parent.curses_pad.nodelay(1)
             ch2 = self.parent.curses_pad.getch()
-            if ch2 != -1: 
+            if ch2 != -1:
                 ch = curses.ascii.alt(ch2)
             self.parent.curses_pad.timeout(-1) # back to blocking mode
             #curses.flushinp()
-        
+
         self.handle_input(ch)
         if self.check_value_change:
             self.when_check_value_changed()
         if self.check_cursor_move:
             self.when_check_cursor_moved()
-        
-        
+
+
         self.try_adjust_widgets()
-            
+
     def intersted_in_mouse_event(self, mouse_event):
         if not self.editable and not self.interested_in_mouse_even_when_not_editable:
             return False
@@ -518,11 +533,11 @@ big a given widget is ... use .height and .width instead"""
             if self.rely  <= y <= self.rely + self.height-1 + self.parent.show_aty:
                 return True
         return False
-    
+
     def handle_mouse_event(self, mouse_event):
         # mouse_id, x, y, z, bstate = mouse_event
         pass
-    
+
     def interpret_mouse_event(self, mouse_event):
         mouse_id, x, y, z, bstate = mouse_event
         x += self.parent.show_from_x
@@ -530,7 +545,7 @@ big a given widget is ... use .height and .width instead"""
         rel_y       = y - self.rely - self.parent.show_aty
         rel_x = x - self.relx - self.parent.show_atx
         return (mouse_id, rel_x, rel_y, z, bstate)
-        
+
     #def when_parent_changes_value(self):
         # Can be called by forms when they chage their value.
         #pass
@@ -549,12 +564,12 @@ big a given widget is ... use .height and .width instead"""
         if hasattr(self, 'parent_widget'):
             self.parent_widget.when_value_edited()
         return True
-    
+
     def when_value_edited(self):
         """Called when the user edits the value of the widget.  Will usually also be called the first time
         that the user edits the widget."""
         pass
-    
+
     def when_check_cursor_moved(self):
         if hasattr(self, 'cursor_line'):
             cursor = self.cursor_line
@@ -574,7 +589,7 @@ big a given widget is ... use .height and .width instead"""
         self.when_cursor_moved()
         if hasattr(self, 'parent_widget'):
             self.parent_widget.when_cursor_moved()
-        
+
     def when_cursor_moved(self):
         "Called when the cursor moves"
         pass
@@ -584,12 +599,12 @@ big a given widget is ... use .height and .width instead"""
         printable chars.  (Try to catch dodgy input).  Give it a string,
         and it will return a string safe to print - without touching
         the original.  In Python 3 this function is not needed
-        
+
         N.B. This will return a unicode string on python 3 and a utf-8 string
         on python2
         """
         try:
-            if not this_string: 
+            if not this_string:
                 return ""
             #this_string = str(this_string)
             # In python 3
@@ -599,7 +614,7 @@ big a given widget is ... use .height and .width instead"""
                 rtn_value = this_string.replace('\n', ' ')
             else:
                 rtn_value = this_string
-        
+
             # Does the terminal want ascii?
             if self._force_ascii:
                 if isinstance(rtn_value, bytes):
@@ -614,7 +629,7 @@ big a given widget is ... use .height and .width instead"""
                         # even on python3, in this case, we want a string that
                         # contains only ascii chars - but in unicode, so:
                         rtn_value = rtn_value.encode('ascii', 'replace').decode()
-                        return rtn_value     
+                        return rtn_value
                     else:
                         return rtn_value.encode('ascii', 'replace')
                 return rtn_value
@@ -629,7 +644,7 @@ big a given widget is ... use .height and .width instead"""
                         # Python2.6
                         rtn_value = rtn_value.decode(self.encoding, 'replace')
                 if sys.version_info[0] >= 3:
-                    return rtn_value     
+                    return rtn_value
                 else:
                     return rtn_value.encode('utf-8', 'replace')
             else:
@@ -640,7 +655,7 @@ big a given widget is ... use .height and .width instead"""
                 raise
             else:
                 return "*ERROR DISPLAYING STRING*"
-    
+
     def safe_filter(self, this_string):
         try:
             this_string = this_string.decode(self.encoding, 'replace')
@@ -663,38 +678,39 @@ big a given widget is ... use .height and .width instead"""
                 except:
                     s.append('?')
             s = ''.join(s)
-        
+
             self._safe_filter_value_cache = (this_string, s)
-        
+
             return s
-        
-        #s = ''
-        #for cha in this_string.replace('\n', ''):
-        #    try:
-        #        s += cha.encode('ascii')
-        #    except:
-        #        s += '?'
-        #return s
-        
+
+
 class DummyWidget(Widget):
-    "This widget is invisible and does nothing.  Which is sometimes important."
-    def __init__(self, screen, *args, **keywords):
-        super(DummyWidget, self).__init__(screen, *args, **keywords)
+    """
+    This widget is invisible and does nothing.  Which is sometimes important.
+    """
+    def __init__(self, screen, *args, **kwargs):
+        super(DummyWidget, self).__init__(screen, *args, **kwargs)
         self.height = 0
         self.widget = 0
         self.parent = screen
+
     def display(self):
         pass
+
     def update(self, clear=False):
         pass
+
     def set_editable(self, value):
-        if value: self._is_editable = True
-        else: self._is_editable = False
+        if value:
+            self._is_editable = True
+        else:
+            self._is_editable = False
+
     def get_editable(self):
         return(self._is_editable)
+
     def clear(self, usechar=' '):
         pass
+
     def calculate_area_needed(self):
-        return 0,0
-
-
+        return 0, 0

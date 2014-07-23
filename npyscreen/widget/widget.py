@@ -1,30 +1,17 @@
 # encoding: utf-8
 
-#import codecs
 import copy
 import sys
 import curses
 import curses.ascii
-#import curses.wrapper
 import weakref
 from .. import global_options
 import locale
-#import warnings
 
 from ..globals import DEBUG
 
 
-EXITED_DOWN = 1
-EXITED_UP = -1
-EXITED_LEFT = -2
-EXITED_RIGHT = 2
-EXITED_ESCAPE = 127
-EXITED_MOUSE = 130
 
-SETMAX = 'SETMAX'
-RAISEERROR = 'RAISEERROR'
-
-ALLOW_NEW_INPUT = True
 
 
 class NotEnoughSpaceForWidget(Exception):

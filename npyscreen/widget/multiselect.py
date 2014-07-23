@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-from . import wgmultiline    as multiline
-from . import wgselectone    as selectone
-from . import wgcheckbox     as checkbox
+from . import multiline
+from . import selectone
+from . import checkbox
 import curses
 
 

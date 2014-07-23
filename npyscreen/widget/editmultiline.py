@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from . import wgwidget    as widget
+from . import widget
 from .. import global_options
 import locale
 import sys

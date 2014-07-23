@@ -6,17 +6,17 @@ custom Forms. These Forms are added to Apps and represent a unit of display
 content (of which Widgets are the subunits).
 """
 
-from .Form import FormBaseNew, Form, TitleForm, TitleFooterForm, SplitForm,\
+from .form import FormBaseNew, Form, TitleForm, TitleFooterForm, SplitForm,\
                     FormExpanded, FormBaseNewExpanded
-from .ActionForm import ActionForm, ActionFormExpanded
-from .FormWithMenus import FormWithMenus, ActionFormWithMenus,\
+from .actionform import ActionForm, ActionFormExpanded
+from .formwithmenus import FormWithMenus, ActionFormWithMenus,\
                           FormBaseNewWithMenus, SplitFormWithMenus
-from .Popup import Popup, MessagePopup, ActionPopup, PopupWide, ActionPopupWide
-from .FormMutt import FormMutt, FormMuttWithMenus
-from .FileSelector import FileSelector, selectFile
-from .FormMuttActive import ActionControllerSimple, TextCommandBox,\
+from .popup import Popup, MessagePopup, ActionPopup, PopupWide, ActionPopupWide
+from .formmutt import FormMutt, FormMuttWithMenus
+from .fileselector import FileSelector, selectFile
+from .formmuttactive import ActionControllerSimple, TextCommandBox,\
                             FormMuttActive, FormMuttActiveWithMenus
-from .FormMultiPage import FormMultiPage, FormMultiPageAction,\
+from .formmultipage import FormMultiPage, FormMultiPageAction,\
                            FormMultiPageActionWithMenus, FormMultiPageWithMenus
 
 

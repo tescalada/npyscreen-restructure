@@ -4,7 +4,7 @@ import curses
 import _curses
 import weakref
 
-from .edit_loop import FormDefaultEditLoop, FormNewEditLoop
+from .editloop import FormDefaultEditLoop, FormNewEditLoop
 from .screen import ScreenArea
 from ..widget import button
 from ..widget import widget
@@ -417,12 +417,12 @@ class _FormBase(ScreenArea,
     add = add_widget
 
 
-class FormBaseNew(form_edit_loop.FormNewEditLoop, _FormBase):
+class FormBaseNew(FormNewEditLoop, _FormBase):
     # use the new-style edit loop.
     pass
 
 
-class Form(form_edit_loop.FormDefaultEditLoop, _FormBase):
+class Form(FormDefaultEditLoop, _FormBase):
     #use the old-style edit loop
     pass
 
@@ -431,14 +431,14 @@ class Form(form_edit_loop.FormDefaultEditLoop, _FormBase):
         self.move_ok_button()
 
 
-class FormBaseNewExpanded(form_edit_loop.FormNewEditLoop, _FormBase):
+class FormBaseNewExpanded(FormNewEditLoop, _FormBase):
     BLANK_LINES_BASE = 1
     OK_BUTTON_BR_OFFSET = (1, 6)
     # use the new-style edit loop.
     pass
 
 
-class FormExpanded(form_edit_loop.FormDefaultEditLoop, _FormBase):
+class FormExpanded(FormDefaultEditLoop, _FormBase):
     BLANK_LINES_BASE = 1
     OK_BUTTON_BR_OFFSET = (1, 6)
     #use the old-style edit loop

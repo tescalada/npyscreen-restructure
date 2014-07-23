@@ -1,44 +1,47 @@
 # encoding: utf-8
 
-import copy
-from . import wgwidget       as widget
-from . import wgtextbox      as textbox
-import textwrap
-import curses
-from . import wgtitlefield   as titlefield
-from . import fmPopup        as Popup
-import weakref
 import collections
 import copy
+import curses
+import textwrap
+import weakref
+
+from .constants import EXITED_DOWN, EXITED_UP
+from . import widget
+from . import textbox
+from . import titlefield
+#from ..form import popup
+
 
 MORE_LABEL = "- more -"  # string to tell user there are more options
 
 
-class FilterPopupHelper(Popup.Popup):
-    def create(self):
-        super(FilterPopupHelper, self).create()
-        self.filterbox = self.add(titlefield.TitleText, name='Find:', )
-        self.nextrely += 1
-        self.statusline = self.add(textbox.Textfield,
-                                   color='LABEL',
-                                   editable=False)
+#class FilterPopupHelper(popup.Popup):
+    #def create(self):
+        #super(FilterPopupHelper, self).create()
+        #self.filterbox = self.add(titlefield.TitleText, name='Find:', )
+        #self.nextrely += 1
+        #self.statusline = self.add(textbox.Textfield,
+                                   #color='LABEL',
+                                   #editable=False)
 
-    def updatestatusline(self):
-        self.owner_widget._filter   = self.filterbox.value
-        filtered_lines = self.owner_widget.get_filtered_indexes()
-        len_f = len(filtered_lines)
-        if self.filterbox.value == None or self.filterbox.value == '':
-            self.statusline.value = ''
-        elif len_f == 0:
-            self.statusline.value = '(No Matches)'
-        elif len_f == 1:
-            self.statusline.value = '(1 Match)'
-        else:
-            self.statusline.value = '(%s Matches)' % len_f
+    #def updatestatusline(self):
+        #self.owner_widget._filter = self.filterbox.value
+        #filtered_lines = self.owner_widget.get_filtered_indexes()
+        #len_f = len(filtered_lines)
+        ##if self.filterbox.value == None or self.filterbox.value == '':
+        #if self.filterbox.value is None or self.filterbox.value == '':
+            #self.statusline.value = ''
+        #elif len_f == 0:
+            #self.statusline.value = '(No Matches)'
+        #elif len_f == 1:
+            #self.statusline.value = '(1 Match)'
+        #else:
+            #self.statusline.value = '(%s Matches)' % len_f
 
-    def adjust_widgets(self):
-        self.updatestatusline()
-        self.statusline.display()
+    #def adjust_widgets(self):
+        #self.updatestatusline()
+        #self.statusline.display()
 
 
 class MultiLine(widget.Widget):
@@ -57,14 +60,14 @@ the same effect can be achieved by altering the __str__() method of displayed ob
             widgets_inherit_color = False,
             always_show_cursor = False,
             allow_filtering    = True,
-             **keywords):
+             **kwargs):
 
-        self.never_cache     = False
-        self.exit_left       = exit_left
-        self.exit_right      = exit_right
+        self.never_cache = False
+        self.exit_left = exit_left
+        self.exit_right = exit_right
         self.allow_filtering = allow_filtering
         self.widgets_inherit_color = widgets_inherit_color
-        super(MultiLine, self).__init__(screen, **keywords)
+        super(MultiLine, self).__init__(screen, **kwargs)
         if self.height < self.__class__._MINIMUM_HEIGHT:
             raise widget.NotEnoughSpaceForWidget("Height of %s allocated. Not enough space allowed for %s" % (self.height, str(self)))
         self.make_contained_widgets()
@@ -81,8 +84,8 @@ the same effect can be achieved by altering the __str__() method of displayed ob
         self.always_show_cursor = always_show_cursor
 
 
-        self.slow_scroll     = slow_scroll
-        self.scroll_exit     = scroll_exit
+        self.slow_scroll = slow_scroll
+        self.scroll_exit = scroll_exit
 
         self.start_display_at = 0
         self.cursor_line = 0
@@ -98,7 +101,8 @@ the same effect can be achieved by altering the __str__() method of displayed ob
         self._filtered_values_cache = []
 
         #override - it looks nicer.
-        if self.scroll_exit: self.slow_scroll=True
+        if self.scroll_exit:
+            self.slow_scroll = True
 
     def resize(self):
         super(MultiLine, self).resize()
@@ -106,18 +110,21 @@ the same effect can be achieved by altering the __str__() method of displayed ob
         self.reset_display_cache()
         self.display()
 
-    def make_contained_widgets(self, ):
+    def make_contained_widgets(self):
         self._my_widgets = []
         for h in range(self.height // self.__class__._contained_widget_height):
             self._my_widgets.append(self._contained_widgets(self.parent,
              rely=(h*self._contained_widget_height)+self.rely, relx = self.relx,
              max_width=self.width, max_height=self.__class__._contained_widget_height))
 
-
     def display_value(self, vl):
-        """Overload this function to change how values are displayed.
-Should accept one argument (the object to be represented), and return a string or the
-object to be passed to the contained widget."""
+        """
+        Overload this function to change how values are displayed.
+
+        Should accept one argument (the object to be represented), and return a
+        string or the object to be passed to the contained widget.
+        """
+
         try:
             return self.safe_string(str(vl))
         except ReferenceError:
@@ -129,19 +136,18 @@ object to be passed to the contained widget."""
             return "**** Error ****"
 
     def calculate_area_needed(self):
-        return 0,0
-
+        return 0, 0
 
     def reset_cursor(self):
         self.start_display_at = 0
-        self.cursor_line      = 0
+        self.cursor_line = 0
 
     def reset_display_cache(self):
         self._last_values = False
-        self._last_value  = False
+        self._last_value = False
 
     def update(self, clear=True):
-        if self.hidden and clear:
+        if self.hidden and clar:
             self.clear()
             return False
         elif self.hidden:
@@ -577,9 +583,9 @@ object to be passed to the contained widget."""
 ##          curses.flushinp()
 
 class MultiLineAction(MultiLine):
-    def __init__(self, *args, **keywords):
+    def __init__(self, *args, **kwargs):
         self.allow_multi_action = False
-        super(MultiLineAction, self).__init__(*args, **keywords)
+        super(MultiLineAction, self).__init__(*args, **kwargs)
 
     def actionHighlighted(self, act_on_this, key_press):
         "Override this Method"
@@ -623,11 +629,9 @@ class MultiLineActionWithShortcuts(MultiLineAction):
         self.h_act_on_highlighted(_input)
 
 
-
-
 class Pager(MultiLine):
-    def __init__(self, screen, autowrap=False,  center=False, **keywords):
-        super(Pager, self).__init__(screen, **keywords)
+    def __init__(self, screen, autowrap=False, center=False, **kwargs):
+        super(Pager, self).__init__(screen, **kwargs)
         self.autowrap = autowrap
         self.center = center
         self._values_cache_for_wrapping = []
@@ -664,11 +668,11 @@ class Pager(MultiLine):
             lines = lines.split('\n')
         except AttributeError:
             pass
-        self.values = self._wrap_message_lines(lines, self.width-1)
+        self.values = self._wrap_message_lines(lines, self.width - 1)
         self._values_cache_for_wrapping = self.values
 
     def centerValues(self):
-        self.values  = [ l.strip().center(self.width-1) for l in self.values ]
+        self.values  = [ l.strip().center(self.width - 1) for l in self.values ]
 
     def update(self, clear=True):
         #we look this up a lot. Let's have it here.
@@ -683,7 +687,8 @@ class Pager(MultiLine):
 
         if self.start_display_at > values_len - display_length:
             self.start_display_at = values_len - display_length
-        if self.start_display_at < 0: self.start_display_at = 0
+        if self.start_display_at < 0:
+            self.start_display_at = 0
 
         indexer = 0 + self.start_display_at
         for line in self._my_widgets[:-1]:
@@ -707,8 +712,6 @@ class Pager(MultiLine):
         # Without this line, the first line inherits the color of the form when not editing. Not clear why.
         self._my_widgets[0].update()
 
-
-
     def edit(self):
         # Make sure a value never gets set.
         value = self.value
@@ -719,13 +722,13 @@ class Pager(MultiLine):
         self.start_display_at -= 1
         if self.scroll_exit and self.start_display_at < 0:
             self.editing = False
-            self.how_exited = widget.EXITED_UP
+            self.how_exited = EXITED_UP
 
     def h_scroll_line_down(self, input):
         self.start_display_at += 1
-        if self.scroll_exit and self.start_display_at >= len(self.values)-self.start_display_at+1:
+        if self.scroll_exit and self.start_display_at >= len(self.values) - self.start_display_at + 1:
             self.editing = False
-            self.how_exited = widget.EXITED_DOWN
+            self.how_exited = EXITED_DOWN
 
     def h_scroll_page_down(self, input):
         self.start_display_at += len(self._my_widgets)
@@ -744,29 +747,27 @@ class Pager(MultiLine):
 
     def set_up_handlers(self):
         super(Pager, self).set_up_handlers()
-        self.handlers = {
-                    curses.KEY_UP:      self.h_scroll_line_up,
-                    curses.KEY_LEFT:    self.h_scroll_line_up,
-                    curses.KEY_DOWN:    self.h_scroll_line_down,
-                    curses.KEY_RIGHT:   self.h_scroll_line_down,
-                    curses.KEY_NPAGE:   self.h_scroll_page_down,
-                    curses.KEY_PPAGE:   self.h_scroll_page_up,
-                    curses.KEY_HOME:    self.h_show_beginning,
-                    curses.KEY_END:     self.h_show_end,
-                    curses.ascii.NL:    self.h_exit,
-                    curses.ascii.SP:    self.h_scroll_page_down,
-                    curses.ascii.TAB:   self.h_exit,
-                    ord('j'):           self.h_scroll_line_down,
-                    ord('k'):           self.h_scroll_line_up,
-                    ord('x'):           self.h_exit,
-                    ord('q'):           self.h_exit,
-                    ord('g'):           self.h_show_beginning,
-                    ord('G'):           self.h_show_end,
-                    curses.ascii.ESC:   self.h_exit_escape,
-                }
+        self.handlers = {curses.KEY_UP: self.h_scroll_line_up,
+                         curses.KEY_LEFT: self.h_scroll_line_up,
+                         curses.KEY_DOWN: self.h_scroll_line_down,
+                         curses.KEY_RIGHT: self.h_scroll_line_down,
+                         curses.KEY_NPAGE: self.h_scroll_page_down,
+                         curses.KEY_PPAGE: self.h_scroll_page_up,
+                         curses.KEY_HOME: self.h_show_beginning,
+                         curses.KEY_END: self.h_show_end,
+                         curses.ascii.NL: self.h_exit,
+                         curses.ascii.SP: self.h_scroll_page_down,
+                         curses.ascii.TAB: self.h_exit,
+                         ord('j'): self.h_scroll_line_down,
+                         ord('k'): self.h_scroll_line_up,
+                         ord('x'): self.h_exit,
+                         ord('q'): self.h_exit,
+                         ord('g'): self.h_show_beginning,
+                         ord('G'): self.h_show_end,
+                         curses.ascii.ESC: self.h_exit_escape}
 
-        self.complex_handlers = [
-                    ]
+        self.complex_handlers = []
+
 
 class TitleMultiLine(titlefield.TitleText):
     _entry_type = MultiLine
@@ -781,12 +782,14 @@ class TitleMultiLine(titlefield.TitleText):
             return self.__tmp_values
         else:
             return None
+
     def set_values(self, value):
         if hasattr(self, 'entry_widget'):
             self.entry_widget.values = value
         elif hasattr(self, '__tmp_value'):
             # probably trying to set the value before the textarea is initialised
             self.__tmp_values = value
+
     def del_values(self):
         del self.entry_widget.value
     values = property(get_values, set_values, del_values)
@@ -795,11 +798,12 @@ class TitleMultiLine(titlefield.TitleText):
 class TitlePager(TitleMultiLine):
     _entry_type = Pager
 
+
 class BufferPager(Pager):
     DEFAULT_MAXLEN = None
 
-    def __init__(self, screen, maxlen=False, *args, **keywords):
-        super(BufferPager, self).__init__(screen, *args, **keywords)
+    def __init__(self, screen, maxlen=False, *args, **kwargs):
+        super(BufferPager, self).__init__(screen, *args, **kwargs)
         if maxlen is False:
             maxlen = self.DEFAULT_MAXLEN
         self.values = collections.deque(maxlen=maxlen)
@@ -816,7 +820,7 @@ class BufferPager(Pager):
             pass
 
         self.clearBuffer()
-        self.buffer(self._wrap_message_lines(lines, self.width-1))
+        self.buffer(self._wrap_message_lines(lines, self.width - 1))
         self._values_cache_for_wrapping = copy.deepcopy(self.values)
 
     def buffer(self, lines, scroll_end=True, scroll_if_editing=False):
@@ -827,6 +831,7 @@ class BufferPager(Pager):
                 self.start_display_at = len(self.values) - len(self._my_widgets)
             elif scroll_if_editing:
                 self.start_display_at = len(self.values) - len(self._my_widgets)
+
 
 class TitleBufferPager(TitleMultiLine):
     _entry_type = BufferPager

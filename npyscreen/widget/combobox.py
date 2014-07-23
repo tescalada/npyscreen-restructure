@@ -2,11 +2,12 @@
 
 import curses
 
-from . import wgtextbox     as textbox
-from . import wgmultiline   as multiline
-from . import fmForm        as Form
-from . import fmPopup       as Popup
-from . import wgtitlefield  as titlefield
+from . import textbox
+from . import multiline
+from . import titlefield
+
+#This causes circular imports...
+from ..form.popup import Popup
 
 
 class ComboBox(textbox.Textfield):
@@ -39,7 +40,6 @@ Should accept one argument (the object to be represented), and return a string."
             self.parent.curses_pad.addnstr(self.rely, self.relx, printme, self.width, self.parent.theme_manager.findPair(self))
         else:
             self.parent.curses_pad.addnstr(self.rely, self.relx, printme, self.width)
-
 
     def edit(self):
         #We'll just use the widget one

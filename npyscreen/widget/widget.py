@@ -11,9 +11,6 @@ import locale
 from ..globals import DEBUG
 
 
-
-
-
 class NotEnoughSpaceForWidget(Exception):
     pass
 

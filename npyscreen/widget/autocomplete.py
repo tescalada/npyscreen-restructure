@@ -8,8 +8,13 @@ from . import titlefield
 import os
 from ..form.Popup import Popup
 
+
 class Autocomplete(textbox.Textfield):
-    """This class is fairly useless, but override auto_complete to change that.  See filename class for example"""
+    """
+    This class is fairly useless,but override auto_complete to change that.
+
+    See FileName class for example
+    """
     def set_up_handlers(self):
         super(Autocomplete, self).set_up_handlers()
 
@@ -24,12 +29,13 @@ class Autocomplete(textbox.Textfield):
         #tmp_window = Form.TitleForm(name=self.name, framed=True)
         tmp_window = Popup.Popup(name=self.name, framed=True)
         sel = tmp_window.add_widget(multiline.MultiLine,
-                values=values,
-                value=self.value,
-                return_exit=True, select_exit=True)
+                                    values=values,
+                                    value=self.value,
+                                    return_exit=True,
+                                    select_exit=True)
         #sel = multiline.MultiLine(tmp_window, values=values, value=self.value)
         tmp_window.display()
-        sel.value=0
+        sel.value = 0
         sel.edit()
         return sel.value
 
@@ -40,27 +46,27 @@ class Filename(Autocomplete):
         self.value = os.path.expanduser(self.value)
 
         for i in range(1):
-            dir, fname = os.path.split(self.value)
+            dirname, fname = os.path.split(self.value)
             # Let's have absolute paths.
-            dir = os.path.abspath(dir)
+            dirname = os.path.abspath(dirname)
 
             if self.value == '':
-                self.value=dir
+                self.value = dirname
                 break
 
             try:
-                flist = os.listdir(dir)
+                flist = os.listdir(dirname)
             except:
                 self.show_brief_message("Can't read directory!")
                 break
 
-            flist = [os.path.join(dir, x) for x in flist]
+            flist = [os.path.join(dirname, x) for x in flist]
             possibilities = list(filter(
                 (lambda x: os.path.split(x)[1].startswith(fname)), flist
                 ))
 
             if len(possibilities) is 0:
-                # can't complete
+                #can't complete
                 curses.beep()
                 break
 
@@ -78,7 +84,7 @@ class Filename(Autocomplete):
             if len(possibilities) > 1:
                 filelist = possibilities
             else:
-                filelist = flist #os.listdir(os.path.dirname(self.value))
+                filelist = flist  # os.listdir(os.path.dirname(self.value))
 
             filelist = list(map((lambda x: os.path.normpath(os.path.join(self.value, x))), filelist))
             files_only = []
@@ -106,13 +112,12 @@ class Filename(Autocomplete):
             self.value = combined_list[self.get_choice(combined_list)]
             break
 
-            # Can't complete
+            #Can't complete
             curses.beep()
         #os.path.normpath(self.value)
         os.path.normcase(self.value)
-        self.cursor_position=len(self.value)
+        self.cursor_position = len(self.value)
+
 
 class TitleFilename(titlefield.TitleText):
     _entry_type = Filename
-
-

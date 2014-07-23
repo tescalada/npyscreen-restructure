@@ -2,16 +2,16 @@
 
 import curses
 import weakref
-from .wgwidget import Widget
-from .wgmultiline import MultiLine
+from .widget import Widget
+from .multiline import MultiLine
 
 
 class BoxBasic(Widget):
-    def __init__(self, screen, footer=None, *args, **keywords):
-        super(BoxBasic, self).__init__(screen, *args, **keywords)
+    def __init__(self, screen, footer=None, *args, **kwargs):
+        super(BoxBasic, self).__init__(screen, *args, **kwargs)
         self.footer = footer
-        if 'color' in keywords:
-            self.color = keywords['color'] or 'LABEL'
+        if 'color' in kwargs:
+            self.color = kwargs['color'] or 'LABEL'
         else:
             self.color = 'LABEL'
 
@@ -99,20 +99,19 @@ class BoxBasic(Widget):
 
 class BoxTitle(BoxBasic):
     _contained_widget = MultiLine
-    def __init__(self, screen, *args, **keywords):
-        super(BoxTitle, self).__init__(screen, *args, **keywords)
+    def __init__(self, screen, *args, **kwargs):
+        super(BoxTitle, self).__init__(screen, *args, **kwargs)
         self.make_contained_widget()
-        if 'editable' in keywords:
-            self.entry_widget.editable=keywords['editable']
-        if 'value' in keywords:
-            self.value = keywords['value']
-        if 'values' in keywords:
-            self.values = keywords['values']
-        if 'scroll_exit' in keywords:
-            self.entry_widget.scroll_exit = keywords['scroll_exit']
-        if 'slow_scroll' in keywords:
-            self.entry_widget.scroll_exit = keywords['slow_scroll']
-
+        if 'editable' in kwargs:
+            self.entry_widget.editable=kwargs['editable']
+        if 'value' in kwargs:
+            self.value = kwargs['value']
+        if 'values' in kwargs:
+            self.values = kwargs['values']
+        if 'scroll_exit' in kwargs:
+            self.entry_widget.scroll_exit = kwargs['scroll_exit']
+        if 'slow_scroll' in kwargs:
+            self.entry_widget.scroll_exit = kwargs['slow_scroll']
 
     def make_contained_widget(self):
         self._my_widgets = []
@@ -137,15 +136,13 @@ class BoxTitle(BoxBasic):
         self.entry_widget.resize()
 
     def edit(self):
-        self.editing=True
+        self.editing = True
         self.display()
         self.entry_widget.edit()
         #self.value = self.textarea.value
         self.how_exited = self.entry_widget.how_exited
-        self.editing=False
+        self.editing = False
         self.display()
-
-
 
     def get_value(self):
         if hasattr(self, 'entry_widget'):

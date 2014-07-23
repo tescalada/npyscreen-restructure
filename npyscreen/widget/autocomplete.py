@@ -2,12 +2,11 @@
 
 
 import curses
-from . import wgtextbox    as textbox
-from . import wgmultiline  as multiline
-from . import wgtitlefield as titlefield
+from . import textbox
+from . import multiline
+from . import titlefield
 import os
-from . import fmForm as Form
-from . import fmPopup as Popup
+from ..form.Popup import Popup
 
 class Autocomplete(textbox.Textfield):
     """This class is fairly useless, but override auto_complete to change that.  See filename class for example"""

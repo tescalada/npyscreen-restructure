@@ -25,54 +25,41 @@ from .button import MiniButton, MiniButtonPress
 Button, ButtonPress = MiniButton, MiniButtonPress  # Alias MiniButton[Press]
 from .textbox import Textfield, FixedText
 from .titlefield import TitleText, TitleFixedText
-#from .password import PasswordEntry, TitlePassword
-#from .slider import Slider, TitleSlider
-#from .multiline import MultiLine, Pager, TitleMultiLine, TitlePager,\
-                       #MultiLineAction, BufferPager, TitleBufferPager
-#from .multiselect import MultiSelect, TitleMultiSelect, MultiSelectFixed,\
-                         #TitleMultiSelectFixed, MultiSelectAction
-#from .editmultiline import MultiLineEdit
-#from .combobox import ComboBox, TitleCombo
-#from .checkbox import Checkbox, RoundCheckBox, CheckBoxMultiline,\
-                      #RoundCheckBoxMultiline, CheckBox, CheckboxBare
-#from .FormControlCheckbox import FormControlCheckbox
-#from .autocomplete import TitleFilename, Filename, Autocomplete
-##from .Menu import Menu  # Is this appropriate
-#from .select import SelectOne, TitleSelectOne
-#from .datecombo import DateCombo, TitleDateCombo
-#from .multilinetree import MultiLineTree, SelectOneTree, MultiLineTreeNew,\
-                           #MultiLineTreeNewAction, TreeLine, MLTree,\
-                           #MLTreeAnnotated, MLTreeAction,\
-                           #TreeLineAnnotated, MultiLineTreeNewAnnotatedAction,\
-                           #MultiLineTreeNewAnnotated, MLTreeAnnotatedAction
+from .password import PasswordEntry, TitlePassword
+from .slider import Slider, TitleSlider
+from .multiline import MultiLine, Pager, TitleMultiLine, TitlePager,\
+                       MultiLineAction, BufferPager, TitleBufferPager
+from .multiselect import MultiSelect, TitleMultiSelect, MultiSelectFixed,\
+                         TitleMultiSelectFixed, MultiSelectAction
+from .editmultiline import MultiLineEdit
+from .combobox import ComboBox, TitleCombo
+from .checkbox import Checkbox, RoundCheckBox, CheckBoxMultiline,\
+                      RoundCheckBoxMultiline, CheckBox, CheckboxBare
+from .FormControlCheckbox import FormControlCheckbox
+from .autocomplete import TitleFilename, Filename, Autocomplete
+#from .Menu import Menu  # Is this appropriate
+from .select import SelectOne, TitleSelectOne
+from .datecombo import DateCombo, TitleDateCombo
+from .multilinetree import MultiLineTree, SelectOneTree, MultiLineTreeNew,\
+                           MultiLineTreeNewAction, TreeLine, MLTree,\
+                           MLTreeAnnotated, MLTreeAction,\
+                           TreeLineAnnotated, MultiLineTreeNewAnnotatedAction,\
+                           MultiLineTreeNewAnnotated, MLTreeAnnotatedAction
 
-##Experimental Widgets (take care and report issues!)
-#from .multilinetreeselectable import MLTreeMultiSelect, TreeLineSelectable
-#from .multilinetreeselectable import MLTreeMultiSelectAnnotated,\
-                                     #TreeLineSelectableAnnotated
-#from .filenamecombo import FilenameCombo, TitleFilenameCombo
-#from .annotatetextbox import AnnotateTextboxBaseRight
-#from .multiline import MultiLineActionWithShortcuts
-#from .multilineeditable import MultiLineEditable, MultiLineEditableTitle,\
-                               #MultiLineEditableBoxed
-#from .monthbox import MonthBox
-#from .grid import SimpleGrid
-#from .gridcoltitles import GridColTitles
-#from .boxwidget import BoxBasic, BoxTitle
-#from .NewMenu                 import NewMenu, MenuItem
-#from .NMenuDisplay            import MenuDisplay, MenuDisplayScreen
+#Experimental Widgets (take care and report issues!)
+from .multilinetreeselectable import MLTreeMultiSelect, TreeLineSelectable
+from .multilinetreeselectable import MLTreeMultiSelectAnnotated,\
+                                     TreeLineSelectableAnnotated
+from .filenamecombo import FilenameCombo, TitleFilenameCombo
+from .annotatetextbox import AnnotateTextboxBaseRight
+from .multiline import MultiLineActionWithShortcuts
+from .multilineeditable import MultiLineEditable, MultiLineEditableTitle,\
+                               MultiLineEditableBoxed
+from .monthbox import MonthBox
+from .grid import SimpleGrid
+from .gridcoltitles import GridColTitles
+from .boxwidget import BoxBasic, BoxTitle
+from .NewMenu                 import NewMenu, MenuItem
+from .NMenuDisplay            import MenuDisplay, MenuDisplayScreen
 
-#Big question: are Menus a kind of Widget? should it be npyscreen.widget.menu ?
-
-
-#EXITED_DOWN = 1
-#EXITED_UP = -1
-#EXITED_LEFT = -2
-#EXITED_RIGHT = 2
-#EXITED_ESCAPE = 127
-#EXITED_MOUSE = 130
-
-#SETMAX = 'SETMAX'
-#RAISEERROR = 'RAISEERROR'
-
-#ALLOW_NEW_INPUT = True
+#Where should the menu code really go? should it be a widget subpackage?

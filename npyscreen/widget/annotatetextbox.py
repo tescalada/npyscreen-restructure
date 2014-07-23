@@ -1,7 +1,7 @@
 # encoding: utf-8
 
-from . import wgwidget
-from .wgtextbox import Textfield
+from . import widget
+from .textbox import Textfield
 
 
 class AnnotateTextboxBase(wgwidget.Widget):

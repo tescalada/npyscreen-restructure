@@ -1,8 +1,8 @@
 # encoding: utf-8
 
 import curses
-from . import wgwidget     as widget
-from . import wgtitlefield as titlefield
+from . import widget
+from . import titlefield
 
 
 class Slider(widget.Widget):

@@ -1,8 +1,7 @@
 # encoding: utf-8
 
-import curses
-from .wgtextbox import Textfield
-from . import wgtitlefield as titlefield
+from .textbox import Textfield
+from . import titlefield
 
 
 class PasswordEntry(Textfield):
@@ -19,6 +18,7 @@ class PasswordEntry(Textfield):
             for i in range(strlen):
                 self.parent.curses_pad.addstr(self.rely, tmp_x, '-')
                 tmp_x += 1
+
 
 class TitlePassword(titlefield.TitleText):
     _entry_type = PasswordEntry

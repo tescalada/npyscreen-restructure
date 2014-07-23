@@ -1,36 +1,40 @@
 # encoding: utf-8
 
-from . import proto_fm_screen_area
-from . import wgwidget  as widget
-from . import wgbutton  as button
-import weakref
-from . import npyspmfuncs as pmfuncs
-#import Menu
 import curses
 import _curses
-from .. import global_options
-from . import wgwidget_proto
-from . import fm_form_edit_loop   as form_edit_loop
-from . import util_viewhelp
-from .globals import DISABLE_RESIZE_SYSTEM
+import weakref
 
-class _FormBase(proto_fm_screen_area.ScreenArea,
-        widget.InputHandler,
-        wgwidget_proto._LinePrinter):
+from .edit_loop import FormDefaultEditLoop, FormNewEditLoop
+from .screen import ScreenArea
+from ..widget import button
+from ..widget import widget
+
+#import Menu
+#from .. util_viewhelp
+
+from ..globals import DISABLE_RESIZE_SYSTEM
+from .. import global_options
+
+
+class _FormBase(ScreenArea,
+                widget.InputHandler,
+                widget._LinePrinter):
     BLANK_COLUMNS_RIGHT = 2
     BLANK_LINES_BASE = 2
     OK_BUTTON_TEXT = 'OK'
     OK_BUTTON_BR_OFFSET = (2, 6)
     OKBUTTON_TYPE = button.MiniButton
     DEFAULT_X_OFFSET = 2
-    PRESERVE_SELECTED_WIDGET_DEFAULT = False # Preserve cursor location between displays?
+    #Preserve cursor location between displays?
+    PRESERVE_SELECTED_WIDGET_DEFAULT = False
     FRAMED = True
 
     ALLOW_RESIZE = True
     FIX_MINIMUM_SIZE_WHEN_CREATED = True
 
-    def __init__(self, name=None, parent_app=None, framed=None, help=None, color='FORMDEFAULT',
-                    widget_list=None, cycle_widgets=False, *args, **kwargs):
+    def __init__(self, name=None, parent_app=None, framed=None, help=None,
+                 color='FORMDEFAULT', widget_list=None, cycle_widgets=False,
+                 *args, **kwargs):
         super(_FormBase, self).__init__(*args, **kwargs)
         self.preserve_selected_widget = self.__class__.PRESERVE_SELECTED_WIDGET_DEFAULT
         if parent_app:
@@ -73,18 +77,19 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
         pass
 
     def _clear_all_widgets(self, ):
-        self._widgets__     = []
+        self._widgets__ = []
         self._widgets_by_id = {}
         self._next_w_id = 0
         self.nextrely = self.DEFAULT_NEXTRELY
         self.nextrelx = self.DEFAULT_X_OFFSET
-        self.editw = 0 # Index of widget to edit.
+        self.editw = 0  # Index of widget to edit.
 
     def create_widgets_from_list(self, widget_list, **kwargs):
-        # This code is currently experimental, and the API may change in future releases
+        #This code is currently experimental, and the API may change in future
+        #releases
         # (npyscreen.TextBox, {'rely': 2, 'relx': 7, 'editable': False})
         for line in widget_list:
-            w_type   = line[0]
+            w_type = line[0]
             kwargs = line[1]
             self.add_widget(w_type, **kwargs)
 
@@ -112,18 +117,19 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
         self.DISPLAY()
 
     def create(self):
-        """Programmers should over-ride this in derived classes, creating widgets here"""
+        """
+        Programmers should over-ride this in derived classes, creating widgets
+        here.
+        """
         pass
 
     def set_up_handlers(self):
         self.complex_handlers = []
-        self.handlers = {
-                    curses.KEY_F1: self.h_display_help,
-                    "KEY_F(1)": self.h_display_help,
-                    "^O":       self.h_display_help,
-                    "^L":       self.h_display,
-                    curses.KEY_RESIZE: self._resize,
-                    }
+        self.handlers = {curses.KEY_F1: self.h_display_help,
+                         "KEY_F(1)": self.h_display_help,
+                         "^O": self.h_display_help,
+                         "^L": self.h_display,
+                         curses.KEY_RESIZE: self._resize}
 
     def set_up_exit_condition_handlers(self):
         # What happens when widgets exit?
@@ -131,15 +137,15 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
         # be used to look up the following table.
 
         self.how_exited_handers = {
-            widget.EXITED_DOWN:    self.find_next_editable,
-            widget.EXITED_RIGHT:   self.find_next_editable,
-            widget.EXITED_UP:      self.find_previous_editable,
-            widget.EXITED_LEFT:    self.find_previous_editable,
-            widget.EXITED_ESCAPE:  self.do_nothing,
-            True:                  self.find_next_editable, # A default value
-            widget.EXITED_MOUSE:   self.get_and_use_mouse_event,
-            False:                  self.do_nothing,
-            None:                   self.do_nothing,
+            widget.EXITED_DOWN: self.find_next_editable,
+            widget.EXITED_RIGHT: self.find_next_editable,
+            widget.EXITED_UP: self.find_previous_editable,
+            widget.EXITED_LEFT: self.find_previous_editable,
+            widget.EXITED_ESCAPE: self.do_nothing,
+            True: self.find_next_editable,  # A default value
+            widget.EXITED_MOUSE: self.get_and_use_mouse_event,
+            False: self.do_nothing,
+            None: self.do_nothing,
             }
 
     def handle_exiting_widgets(self, condition):
@@ -195,24 +201,26 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
         self.show_from_y = 0
         self.show_from_x = 0
 
-        while w.rely + w_my -1 > self.show_from_y + max_y:
+        while w.rely + w_my - 1 > self.show_from_y + max_y:
             self.show_from_y += 1
 
         while w.rely < self.show_from_y:
             self.show_from_y -= 1
 
 
-        while w.relx + w_mx -1 > self.show_from_x + max_x:
+        while w.relx + w_mx - 1 > self.show_from_x + max_x:
             self.show_from_x += 1
 
         while w.relx < self.show_from_x:
             self.show_from_x -= 1
 
     def h_display_help(self, input):
-        if self.help == None: return
+        if self.help == None:
+            return
         if self.name:
-            help_name="%s Help" %(self.name)
-        else: help_name=None
+            help_name = "%s Help" %(self.name)
+        else:
+            help_name = None
         curses.flushinp()
         util_viewhelp.view_help(self.help, title=help_name)
         #select.ViewText(self.help, name=help_name)
@@ -271,9 +279,9 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
     def find_next_editable(self, *args):
         if not self.editw == len(self._widgets__):
             if not self.cycle_widgets:
-                r = list(range(self.editw+1, len(self._widgets__)))
+                r = list(range(self.editw + 1, len(self._widgets__)))
             else:
-                r = list(range(self.editw+1, len(self._widgets__))) + list(range(0, self.editw))
+                r = list(range(self.editw + 1, len(self._widgets__))) + list(range(0, self.editw))
             for n in r:
                 if self._widgets__[n].editable and not self._widgets__[n].hidden:
                     self.editw = n
@@ -284,7 +292,7 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
         if not self.editw == 0:
             # remember that xrange does not return the 'last' value,
             # so go to -1, not 0! (fence post error in reverse)
-            for n in range(self.editw-1, -1, -1 ):
+            for n in range(self.editw - 1, -1, -1):
                 if self._widgets__[n].editable and not self._widgets__[n].hidden:
                     self.editw = n
                     break
@@ -307,7 +315,7 @@ class _FormBase(proto_fm_screen_area.ScreenArea,
             self.show_atx = 0
 
     def display(self, clear=False):
-        #APPLICATION_THEME_MANAGER.setTheme(self)
+        #APPLICATION_THEME_MANAGER.set_theme(self)
         if curses.has_colors() and not global_options.DISABLE_ALL_COLORS:
             self.curses_pad.attrset(0)
             color_attribute = self.theme_manager.findPair(self, self.color)
@@ -454,15 +462,16 @@ class TitleForm(Form):
 
 
 class TitleFooterForm(TitleForm):
-    BLANK_LINES_BASE=1
+    BLANK_LINES_BASE = 1
+
     def draw_form(self):
         MAXY, MAXX = self.curses_pad.getmaxyx()
 
         if self.editing:
-            self.curses_pad.hline(MAXY-1, 0, curses.ACS_HLINE,
+            self.curses_pad.hline(MAXY - 1, 0, curses.ACS_HLINE,
                     MAXX - self.__class__.OK_BUTTON_BR_OFFSET[1] - 1)
         else:
-            self.curses_pad.hline(MAXY-1, 0, curses.ACS_HLINE, MAXX-1)
+            self.curses_pad.hline(MAXY - 1, 0, curses.ACS_HLINE, MAXX - 1)
 
         super(TitleFooterForm, self).draw_form()
 
@@ -473,7 +482,8 @@ class SplitForm(Form):
     def __init__(self, draw_line_at=None, *args, **kwargs):
         super(SplitForm, self).__init__(*args, **kwargs)
         if not hasattr(self, 'draw_line_at'):
-            if draw_line_at != None:
+            #if draw_line_at != None:
+            if draw_line_at is not None:
                 self.draw_line_at = draw_line_at
             else:
                 self.draw_line_at = self.get_half_way()
@@ -481,7 +491,7 @@ class SplitForm(Form):
     def draw_form(self,):
         MAXY, MAXX = self.curses_pad.getmaxyx()
         super(SplitForm, self).draw_form()
-        self.curses_pad.hline(self.draw_line_at, 1, curses.ACS_HLINE, MAXX-2)
+        self.curses_pad.hline(self.draw_line_at, 1, curses.ACS_HLINE, MAXX - 2)
 
     def get_half_way(self):
         return self.curses_pad.getmaxyx()[0] // 2
@@ -490,8 +500,3 @@ class SplitForm(Form):
         super(SplitForm, self).resize()
         if self.MOVE_LINE_ON_RESIZE:
             self.draw_line_at = self.get_half_way()
-
-
-
-
-

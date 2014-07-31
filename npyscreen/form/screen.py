@@ -115,37 +115,48 @@ class ScreenArea(object):
         # let's see how big we could be: create a temp screen
         # and see the size curses makes it.  No good to keep, though
         try:
-            mxy, mxx = struct.unpack('hh', fcntl.ioctl(sys.stderr.fileno(), termios.TIOCGWINSZ, 'xxxx'))
-            if (mxy, mxx) == (0,0):
+            mxy, mxx = struct.unpack('hh',
+                                     fcntl.ioctl(sys.stderr.fileno(),
+                                                 termios.TIOCGWINSZ,
+                                                 'xxxx'))
+            if (mxy, mxx) == (0, 0):
                 raise ValueError
         except (ValueError, NameError):
-            mxy, mxx = curses.newwin(0,0).getmaxyx()
+            mxy, mxx = curses.newwin(0, 0).getmaxyx()
 
         # return safe values, i.e. slightly smaller.
-        return (mxy-1, mxx-1)
+        return (mxy - 1, mxx - 1)
 
     def useable_space(self, rely=0, relx=0):
-       mxy, mxx = self.lines, self.columns
-       return (mxy-rely, mxx-1-relx) # x - 1 because can't use last line bottom right.
+        mxy, mxx = self.lines, self.columns
+        #-1 because can't use last line bottom right
+        return (mxy - rely, mxx - 1 - relx)
 
     def widget_useable_space(self, rely=0, relx=0):
         #Slightly misreports space available.
         #mxy, mxx = self.lines, self.columns-1
         mxy, mxx = self.useable_space(rely=rely, relx=relx)
-        return (mxy-self.BLANK_LINES_BASE, mxx-self.BLANK_COLUMNS_RIGHT)
+        return (mxy - self.BLANK_LINES_BASE, mxx - self.BLANK_COLUMNS_RIGHT)
 
     def refresh(self):
         pmfuncs.hide_cursor()
         _my, _mx = self._max_physical()
-        self.curses_pad.move(0,0)
+        self.curses_pad.move(0, 0)
 
-        # Since we can have pannels larger than the screen
-        # let's allow for scrolling them
+        #Since we can have pannels larger than the screen
+        #let's allow for scrolling them
 
-        # Getting strange errors on OS X, with curses sometimes crashing at this point.
-        # Suspect screen size not updated in time. This try: seems to solve it with no ill effects.
+        #Getting strange errors on OS X, with curses sometimes crashing at this
+        #point.
+        #Suspect screen size not updated in time. This try: seems to solve it
+        #with no ill effects.
         try:
-            self.curses_pad.refresh(self.show_from_y,self.show_from_x,self.show_aty,self.show_atx,_my,_mx)
+            self.curses_pad.refresh(self.show_from_y,
+                                    self.show_from_x,
+                                    self.show_aty,
+                                    self.show_atx,
+                                    _my,
+                                    _mx)
         except curses.error:
             pass
         if self.show_from_y is 0 and \

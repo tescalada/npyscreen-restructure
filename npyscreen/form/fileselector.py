@@ -11,19 +11,18 @@ import os
 import os.path
 #import operator  # unused
 
+
 class FileCommand(wgautocomplete.Filename):
     def set_up_handlers(self):
         super(FileCommand, self).set_up_handlers()
-        self.handlers.update ({
-            curses.ascii.NL:    self.h_select_file,
-            "^W":               self.h_up_level,
-        })
+        self.handlers.update({curses.ascii.NL: self.h_select_file,
+                               '^W': self.h_up_level})
 
-    def h_select_file(self, *args, **keywords):
+    def h_select_file(self, *args, **kwargs):
         self.h_exit_down(None)
         self.parent.try_exit()
 
-    def h_up_level(self, *args, **keywords):
+    def h_up_level(self, *args, **kwargs):
         self.value = os.path.split(self.value)[0]
         self.cursor_position = len(self.value)
 
@@ -35,8 +34,7 @@ class FileCommand(wgautocomplete.Filename):
         directory = os.path.abspath(directory)
 
         if self.value == '':
-            self.value=directory
-
+            self.value = directory
 
         try:
             flist = os.listdir(directory)
@@ -85,10 +83,8 @@ class FileGrid(wggrid.SimpleGrid):
 
     def set_up_handlers(self):
         super(FileGrid, self).set_up_handlers()
-        self.handlers.update ({
-            curses.ascii.NL:    self.h_select_file,
-            curses.ascii.SP:    self.h_select_file,
-        })
+        self.handlers.update({curses.ascii.NL: self.h_select_file,
+                              curses.ascii.SP: self.h_select_file})
 
     def change_dir(self, select_file):
         try:
@@ -104,9 +100,7 @@ class FileGrid(wggrid.SimpleGrid):
         self.begin_col_display_at = 0
         return True
 
-
-
-    def h_select_file(self, *args, **keywrods):
+    def h_select_file(self, *args, **kwargs):
         try:
              select_file = os.path.join(self.parent.value, self.values[self.edit_cell[0]][self.edit_cell[1]])
              select_file = os.path.abspath(select_file)
@@ -136,14 +130,14 @@ class FileSelector(fmFormMutt.FormMutt):
     must_exist=False, #Selected File must already exist
     confirm_if_exists=True,
     sort_by_extension=True,
-    *args, **keywords):
+    *args, **kwargs):
 
         self.select_dir = select_dir
         self.must_exist = must_exist
         self.confirm_if_exists = confirm_if_exists
         self.sort_by_extension = sort_by_extension
 
-        super(FileSelector, self).__init__(*args, **keywords)
+        super(FileSelector, self).__init__(*args, **kwargs)
         try:
             if not self.value:
                 self.value = os.getcwd()
@@ -180,8 +174,7 @@ class FileSelector(fmFormMutt.FormMutt):
         self.wCommand.color = 'IMPORTANT'
         self.wCommand.color = 'STANDOUT'
 
-
-    def beforeEditing(self,):
+    def before_editing(self):
         self.adjust_widgets()
         self.set_colors()
 
@@ -233,8 +226,8 @@ class FileSelector(fmFormMutt.FormMutt):
     def adjust_widgets(self):
         self.update_grid()
 
-def selectFile(starting_value=None, *args, **keywords):
-    F = FileSelector(*args, **keywords)
+def selectFile(starting_value=None, *args, **kwargs):
+    F = FileSelector(*args, **kwargs)
     F.set_colors()
     F.wCommand.show_bold = True
     if starting_value:

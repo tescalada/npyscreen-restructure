@@ -17,8 +17,8 @@ class AddressDatabase(object):
               )" \
             )
         db.commit()
-        c.close()    
-    
+        c.close()
+
     def add_record(self, last_name = '', other_names='', email_address=''):
         db = sqlite3.connect(self.dbfilename)
         c = db.cursor()
@@ -26,7 +26,7 @@ class AddressDatabase(object):
                     VALUES(?,?,?)', (last_name, other_names, email_address))
         db.commit()
         c.close()
-    
+
     def update_record(self, record_id, last_name = '', other_names='', email_address=''):
         db = sqlite3.connect(self.dbfilename)
         c = db.cursor()
@@ -34,15 +34,15 @@ class AddressDatabase(object):
                     WHERE record_internal_id=?', (last_name, other_names, email_address, \
                                                         record_id))
         db.commit()
-        c.close()    
+        c.close()
 
     def delete_record(self, record_id):
         db = sqlite3.connect(self.dbfilename)
         c = db.cursor()
         c.execute('DELETE FROM records where record_internal_id=?', (record_id,))
         db.commit()
-        c.close()    
-    
+        c.close()
+
     def list_all_records(self, ):
         db = sqlite3.connect(self.dbfilename)
         c = db.cursor()
@@ -50,7 +50,7 @@ class AddressDatabase(object):
         records = c.fetchall()
         c.close()
         return records
-    
+
     def get_record(self, record_id):
         db = sqlite3.connect(self.dbfilename)
         c = db.cursor()
@@ -69,7 +69,7 @@ class RecordList(npyscreen.MultiLineAction):
 
     def display_value(self, vl):
         return "%s, %s" % (vl[1], vl[2])
-    
+
     def actionHighlighted(self, act_on_this, keypress):
         self.parent.parentApp.getForm('EDITRECORDFM').value =act_on_this[0]
         self.parent.parentApp.switchForm('EDITRECORDFM')
@@ -77,7 +77,7 @@ class RecordList(npyscreen.MultiLineAction):
     def when_add_record(self, *args, **keywords):
         self.parent.parentApp.getForm('EDITRECORDFM').value = None
         self.parent.parentApp.switchForm('EDITRECORDFM')
-    
+
     def when_delete_record(self, *args, **keywords):
         self.parent.parentApp.myDatabase.delete_record(self.values[self.cursor_line][0])
         self.parent.update_list()
@@ -85,22 +85,22 @@ class RecordList(npyscreen.MultiLineAction):
 
 class RecordListDisplay(npyscreen.FormMutt):
     MAIN_WIDGET_CLASS = RecordList
-    def beforeEditing(self):
+    def before_editing(self):
         self.update_list()
-    
+
     def update_list(self):
         self.wMain.values = self.parentApp.myDatabase.list_all_records()
         self.wMain.display()
-    
-    
+
+
 class EditRecord(npyscreen.ActionForm):
     def create(self):
         self.value = None
         self.wgLastName   = self.add(npyscreen.TitleText, name = "Last Name:",)
         self.wgOtherNames = self.add(npyscreen.TitleText, name = "Other Names:")
         self.wgEmail      = self.add(npyscreen.TitleText, name = "Email:")
-        
-    def beforeEditing(self):
+
+    def before_editing(self):
         if self.value:
             record = self.parentApp.myDatabase.get_record(self.value)
             self.name = "Record id : %s" % record[0]
@@ -114,7 +114,7 @@ class EditRecord(npyscreen.ActionForm):
             self.wgLastName.value   = ''
             self.wgOtherNames.value = ''
             self.wgEmail.value      = ''
-    
+
     def on_ok(self):
         if self.record_id: # We are editing an existing record
             self.parentApp.myDatabase.update_record(self.record_id,
@@ -128,11 +128,11 @@ class EditRecord(npyscreen.ActionForm):
             email_address = self.wgEmail.value,
             )
         self.parentApp.switchFormPrevious()
-    
+
     def on_cancel(self):
         self.parentApp.switchFormPrevious()
-        
-    
+
+
 
 
 class AddressBookApplication(npyscreen.NPSAppManaged):
@@ -140,7 +140,7 @@ class AddressBookApplication(npyscreen.NPSAppManaged):
         self.myDatabase = AddressDatabase()
         self.addForm("MAIN", RecordListDisplay)
         self.addForm("EDITRECORDFM", EditRecord)
-    
+
 if __name__ == '__main__':
     myApp = AddressBookApplication()
-    myApp.run() 
+    myApp.run()

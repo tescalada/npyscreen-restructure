@@ -10,7 +10,7 @@ from ..widget import button
 from ..widget import widget
 
 #import Menu
-#from .. util_viewhelp
+from .. import util_viewhelp
 
 from ..globals import DISABLE_RESIZE_SYSTEM
 from .. import global_options
@@ -396,10 +396,10 @@ class _FormBase(ScreenArea,
             max_height = self.curses_pad.getmaxyx()[0] - rely - 1
 
         _w = widget_class(self,
-                rely=rely,
-                relx=relx,
-                max_height=max_height,
-                *args, **kwargs)
+                          rely=rely,
+                          relx=relx,
+                          max_height=max_height,
+                          *args, **kwargs)
 
         self.nextrely = _w.height + _w.rely
         self._widgets__.append(_w)

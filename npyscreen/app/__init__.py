@@ -34,7 +34,11 @@ class SimpleApp(object):
         pass
 
     def __remove_argument_call_main(self, screen, enable_mouse=True):
-        # screen disgarded.
+        # screen disgarded.#if fork is None:
+            #return safewrapper.wrapper(self.__remove_argument_call_main)
+        #else:
+            #return safewrapper.wrapper(self.__remove_argument_call_main,
+                                       #fork=fork)
         if enable_mouse:
             curses.mousemask(curses.ALL_MOUSE_EVENTS)
         del screen
@@ -42,11 +46,13 @@ class SimpleApp(object):
 
     def run(self, fork=None):
         """Run application.  Calls Mainloop wrapped properly."""
-        if fork is None:
-            return safewrapper.wrapper(self.__remove_argument_call_main)
-        else:
-            return safewrapper.wrapper(self.__remove_argument_call_main,
-                                           fork=fork)
+        #if fork is None:
+            #return safewrapper.wrapper(self.__remove_argument_call_main)
+        #else:
+            #return safewrapper.wrapper(self.__remove_argument_call_main,
+                                       #fork=fork)
+        return safewrapper.wrapper(self.__remove_argument_call_main,
+                                   fork=fork)
 
 
 class App(SimpleApp):
@@ -223,9 +229,6 @@ class App(SimpleApp):
         """
 
         self.on_start()
-        #Why test for nonempty string? Why not just test boolean?
-        #Then any value for next_active_form which is False in a boolean
-        #expression would stop loop
         #while self.next_active_form != "" and self.next_active_form is not None:
         while self.next_active_form:
             self._last_active_form = self._forms[self.next_active_form]
@@ -235,32 +238,38 @@ class App(SimpleApp):
                 self._THISFORM = Fm(parent_app=self, *args, **kwargs)
             except TypeError:
                 self._THISFORM = self._forms[self.next_active_form]
-            self._THISFORM.FORM_NAME = self.next_active_form
-            self.ACTIVE_FORM_NAME = self.next_active_form
-            if len(self._form_visit_list) > 0:
-                if self._form_visit_list[-1] != self.next_active_form:
-                    self._form_visit_list.append(self.next_active_form)
-            else:
+            self._current_form.FORM_NAME = self.next_active_form  # Why assign?
+            #self.ACTIVE_FORM_NAME = self.next_active_form
+
+            #if len(self._form_visit_list) > 0:
+                #if self._form_visit_list[-1] != self.next_active_form:
+                    #self._form_visit_list.append(self.next_active_form)
+            #else:
+                #self._form_visit_list.append(self.next_active_form)
+            #Append form-id to the visit list if it is empty or the last entry
+            #is not the same as the current form-id
+            if ([None] + self._form_visit_list)[-1] != self.next_active_form:
                 self._form_visit_list.append(self.next_active_form)
-            #self._THISFORM._resize()
+
+            #self._current_form._resize()
             #I think checking for methods in classes like this is really weird
             #and unnecessary in most cases, but in this one I don't see a
             #better (less convoluted way). Revisit later, note that I did change
             #similar uses situation below
-            if hasattr(self._THISFORM, "activate"):
-                self._THISFORM._resize()
-                self._THISFORM.activate()
+            if hasattr(self._current_form, 'activate'):
+                self._current_form._resize()
+                self._current_form.activate()
             else:
-                self._THISFORM.before_editing()
-                self._THISFORM._resize()
-                self._THISFORM.edit()
-                self._THISFORM.after_editing()
-                #if hasattr(self._THISFORM, "beforeEditing"):
-                #    self._THISFORM.beforeEditing()
-                #self._THISFORM._resize()
-                #self._THISFORM.edit()
-                #if hasattr(self._THISFORM, "afterEditing"):
-                #    self._THISFORM.afterEditing()
+                self._current_form.before_editing()
+                self._current_form._resize()
+                self._current_form.edit()
+                self._current_form.after_editing()
+                #if hasattr(self._current_form, "before_editing"):
+                #    self._current_form.before_editing()
+                #self._current_form._resize()
+                #self._current_form.edit()
+                #if hasattr(self._current_form, "afterEditing"):
+                #    self._current_form.afterEditing()
 
             self.on_in_main_loop()
         self.on_clean_exit()

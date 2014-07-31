@@ -2,8 +2,13 @@
 
 from . import fmForm
 from . import wgwidget as widget
+
+
 class ActionForm(fmForm.Form):
-    """A form with OK and Cancel buttons.  Users should override the on_ok and on_cancel methods."""
+    """
+    A form with OK and Cancel buttons.  Users should override the `on_ok` and
+    `on_cancel` methods.
+    """
     CANCEL_BUTTON_BR_OFFSET = (2, 12)
     OK_BUTTON_TEXT          = "OK"
     CANCEL_BUTTON_TEXT      = "Cancel"
@@ -39,8 +44,8 @@ class ActionForm(fmForm.Form):
 
         self.editing=True
         if self.editw < 0: self.editw=0
-        if self.editw > len(self._widgets__)-1:
-            self.editw = len(self._widgets__)-1
+        if self.editw > len(self._widgets__) - 1:
+            self.editw = len(self._widgets__) - 1
         if not self.preserve_selected_widget:
             self.editw = 0
 
@@ -52,20 +57,22 @@ class ActionForm(fmForm.Form):
 
         while not self._widgets__[self.editw].editable:
             self.editw += 1
-            if self.editw > len(self._widgets__)-2:
+            if self.editw > len(self._widgets__) - 2:
                 self.editing = False
                 return False
 
         self.edit_return_value = None
         while self.editing:
-            if not self.ALL_SHOWN: self.on_screen()
+            if not self.ALL_SHOWN:
+                self.on_screen()
             self.while_editing()
             self._widgets__[self.editw].edit()
             self._widgets__[self.editw].display()
 
             self.handle_exiting_widgets(self._widgets__[self.editw].how_exited)
 
-            if self.editw > len(self._widgets__)-1: self.editw = len(self._widgets__)-1
+            if self.editw > len(self._widgets__) - 1:
+                self.editw = len(self._widgets__) - 1
             if self.ok_button.value or self.c_button.value:
                 self.editing = False
 
@@ -100,10 +107,9 @@ class ActionForm(fmForm.Form):
             c_button_text = self.CANCEL_BUTTON_TEXT
             cmy, cmx = self.curses_pad.getmaxyx()
             cmy -= self.__class__.CANCEL_BUTTON_BR_OFFSET[0]
-            cmx -= len(c_button_text)+self.__class__.CANCEL_BUTTON_BR_OFFSET[1]
+            cmx -= len(c_button_text) + self.__class__.CANCEL_BUTTON_BR_OFFSET[1]
             self.c_button.rely = cmy
             self.c_button.relx = cmx
-
 
 
 class ActionFormExpanded(ActionForm):

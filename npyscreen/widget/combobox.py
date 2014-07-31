@@ -12,21 +12,21 @@ from ..form.popup import Popup
 
 class ComboBox(textbox.Textfield):
     ENSURE_STRING_VALUE = False
-    def __init__(self, screen, value = None, values=None,**keywords):
+    def __init__(self, screen, value = None, values=None,**kwargs):
         self.values = values or []
         self.value = value or None
         if value is 0:
             self.value = 0
-        super(ComboBox, self).__init__(screen, **keywords)
+        super(ComboBox, self).__init__(screen, **kwargs)
 
     def display_value(self, vl):
         """Overload this function to change how values are displayed.
 Should accept one argument (the object to be represented), and return a string."""
         return str(vl)
 
-    def update(self, **keywords):
-        keywords.update({'cursor': False})
-        super(ComboBox, self).update(**keywords)
+    def update(self, **kwargs):
+        kwargs.update({'cursor': False})
+        super(ComboBox, self).update(**kwargs)
 
     def _print(self):
         if self.value == None or self.value is '':

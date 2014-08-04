@@ -35,7 +35,7 @@ from .editmultiline import MultiLineEdit
 from .combobox import ComboBox, TitleCombo
 from .checkbox import Checkbox, RoundCheckBox, CheckBoxMultiline,\
                       RoundCheckBoxMultiline, CheckBox, CheckboxBare
-from .FormControlCheckbox import FormControlCheckbox
+from .formcontrolcheckbox import FormControlCheckbox
 from .autocomplete import TitleFilename, Filename, Autocomplete
 #from .Menu import Menu  # Is this appropriate
 from .select import SelectOne, TitleSelectOne

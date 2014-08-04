@@ -59,7 +59,5 @@ from .monthbox import MonthBox
 from .grid import SimpleGrid
 from .gridcoltitles import GridColTitles
 from .boxwidget import BoxBasic, BoxTitle
-from .NewMenu                 import NewMenu, MenuItem
-from .NMenuDisplay            import MenuDisplay, MenuDisplayScreen
-
-#Where should the menu code really go? should it be a widget subpackage?
+from .NewMenu import NewMenu, MenuItem
+from .NMenuDisplay import MenuDisplay, MenuDisplayScreen

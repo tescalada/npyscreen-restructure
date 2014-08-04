@@ -1,16 +1,16 @@
 # encoding: utf-8
 
 import curses
-from . import wgwidget
-from . import wgmultiline
-from . import wgtextbox as textbox
-from . import wgboxwidget
+from . import widget
+from . import multiline
+from . import textbox
+from . import boxwidget
 
 
-class MultiLineEditable(wgmultiline.MultiLine):
-    _contained_widgets      = textbox.Textfield
-    CHECK_VALUE             = True
-    ALLOW_CONTINUE_EDITING  = True
+class MultiLineEditable(multiline.MultiLine):
+    _contained_widgets = textbox.Textfield
+    CHECK_VALUE = True
+    ALLOW_CONTINUE_EDITING = True
     CONTINUE_EDITING_AFTER_EDITING_ONE_LINE = True
 
     def get_new_value(self):
@@ -27,7 +27,7 @@ class MultiLineEditable(wgmultiline.MultiLine):
             self.insert_line_value()
             return False
         try:
-            active_line = self._my_widgets[(self.cursor_line-self.start_display_at)]
+            active_line = self._my_widgets[(self.cursor_line - self.start_display_at)]
         except IndexError:
             self._my_widgets[0]
             self.cursor_line = 0
@@ -70,15 +70,12 @@ class MultiLineEditable(wgmultiline.MultiLine):
         active_line = self._my_widgets[(self.cursor_line-self.start_display_at)]
         continue_editing = self.ALLOW_CONTINUE_EDITING
         if hasattr(active_line, 'how_exited'):
-            while active_line.how_exited == wgwidget.EXITED_DOWN and continue_editing:
-                self.values.insert(self.cursor_line+1, self.get_new_value())
+            while active_line.how_exited == widget.EXITED_DOWN and continue_editing:
+                self.values.insert(self.cursor_line + 1, self.get_new_value())
                 self.cursor_line += 1
                 self.display()
                 continue_editing = self.edit_cursor_line_value()
                 active_line = self._my_widgets[(self.cursor_line-self.start_display_at)]
-
-
-
 
     def h_insert_next_line(self, ch):
         if len(self.values) == self.cursor_line - 1 or len(self.values) == 0:
@@ -106,20 +103,19 @@ class MultiLineEditable(wgmultiline.MultiLine):
 
     def set_up_handlers(self):
         super(MultiLineEditable, self).set_up_handlers()
-        self.handlers.update ( {
-                    ord('i'):           self.h_insert_value,
-                    ord('o'):           self.h_insert_next_line,
-                    curses.ascii.CR:    self.h_edit_cursor_line_value,
-                    curses.ascii.NL:    self.h_edit_cursor_line_value,
-                    curses.ascii.SP:    self.h_edit_cursor_line_value,
+        self.handlers.update({ord('i'): self.h_insert_value,
+                              ord('o'): self.h_insert_next_line,
+                              curses.ascii.CR: self.h_edit_cursor_line_value,
+                              curses.ascii.NL: self.h_edit_cursor_line_value,
+                              curses.ascii.SP: self.h_edit_cursor_line_value,
+                              curses.ascii.DEL: self.h_delete_line_value,
+                              curses.ascii.BS: self.h_delete_line_value,
+                              curses.KEY_BACKSPACE: self.h_delete_line_value})
 
-                    curses.ascii.DEL:       self.h_delete_line_value,
-                    curses.ascii.BS:        self.h_delete_line_value,
-                    curses.KEY_BACKSPACE:   self.h_delete_line_value,
-                } )
 
-class MultiLineEditableTitle(wgmultiline.TitleMultiLine):
+class MultiLineEditableTitle(multiline.TitleMultiLine):
     _entry_type = MultiLineEditable
 
-class MultiLineEditableBoxed(wgboxwidget.BoxTitle):
+
+class MultiLineEditableBoxed(boxwidget.BoxTitle):
     _contained_widget = MultiLineEditable

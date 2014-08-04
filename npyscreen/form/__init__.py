@@ -7,10 +7,10 @@ content (of which Widgets are the subunits).
 """
 
 from .form import FormBaseNew, Form, TitleForm, TitleFooterForm, SplitForm,\
-                    FormExpanded, FormBaseNewExpanded
+                  FormExpanded, FormBaseNewExpanded
 from .actionform import ActionForm, ActionFormExpanded
 from .formwithmenus import FormWithMenus, ActionFormWithMenus,\
-                          FormBaseNewWithMenus, SplitFormWithMenus
+                           FormBaseNewWithMenus, SplitFormWithMenus
 from .popup import Popup, MessagePopup, ActionPopup, PopupWide, ActionPopupWide
 from .formmutt import FormMutt, FormMuttWithMenus
 from .fileselector import FileSelector, selectFile

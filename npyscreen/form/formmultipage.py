@@ -26,8 +26,8 @@ class FormMultiPage(fmForm.FormBaseNew):
         if not self.ALLOW_RESIZE:
             return False
 
-        if hasattr(self, 'parentApp'):
-            self.parentApp.resize()
+        if hasattr(self, 'parent_app'):
+            self.parent_app.resize()
 
         self._create_screen()
         self.resize()

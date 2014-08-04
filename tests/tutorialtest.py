@@ -1,19 +1,27 @@
-import npyscreen
+from npyscreen.app import App
+import npyscreen.form as form
 
-class myEmployeeForm(npyscreen.Form):
-    def afterEditing(self):
-        self.parentApp.NEXT_ACTIVE_FORM = None
+
+class MyEmployeeForm(Form):
+    def after_editing(self):
+        self.parent_app.NEXT_ACTIVE_FORM = None
 
     def create(self):
-       self.myName        = self.add(npyscreen.TitleText, name='Name')
-       self.myDepartment = self.add(npyscreen.TitleSelectOne, scroll_exit=True, max_height=3, name='Department', values = ['Department 1', 'Department 2', 'Department 3'])
-       self.myDate        = self.add(npyscreen.TitleDateCombo, name='Date Employed')
+        self.my_name = self.add(form.TitleText, name='Name')
+        self.my_department = self.add(form.TitleSelectOne,
+                                      scroll_exit=True,
+                                      max_height=3,
+                                      name='Department',
+                                      values=['Department 1',
+                                              'Department 2',
+                                              'Department 3'])
+        self.my_date = self.add(form.TitleDateCombo, name='Date Employed')
 
-class MyApplication(npyscreen.NPSAppManaged):
-   def onStart(self):
-       self.addForm('MAIN', myEmployeeForm, name='New Employee')
-       # A real application might define more forms here.......
+class MyApplication(App):
+    def on_start(self):
+        self.add_form('MAIN', MyEmployeeForm, name='New Employee')
+        # A real application might define more forms here.......
 
 if __name__ == '__main__':
-   TestApp = MyApplication().run()
+    TestApp = MyApplication().run()
 

@@ -2,7 +2,7 @@ import npyscreen
 
 class myEmployeeForm(npyscreen.Form):
     def afterEditing(self):
-        self.parentApp.NEXT_ACTIVE_FORM = None
+        self.parent_app.NEXT_ACTIVE_FORM = None
 
     def create(self):
        self.myName        = self.add(npyscreen.TitleText, name='Name')

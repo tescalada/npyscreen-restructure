@@ -5,7 +5,7 @@ import curses
 class TestForm(npyscreen.Form):
 
     def afterEditing(self):
-        self.parentApp.setNextForm(None)
+        self.parent_app.setNextForm(None)
 
     def create(self):
         self.grid = self.add(npyscreen.GridColTitles, name='GRID',

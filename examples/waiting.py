@@ -20,7 +20,7 @@ class TestApp(npyscreen.NPSApp):
         # These lines create the form and populate it with widgets.
         # A fairly complex screen in only 8 or so lines of code - a line for each control.
         self.keypress_timeout_default = 10
-        F = BeepForm(parentApp=self, name = "Welcome to Npyscreen",)
+        F = BeepForm(parent_app=self, name = "Welcome to Npyscreen",)
         t = F.add(npyscreen.TitleText, name = "Text:", )
         fn = F.add(npyscreen.TitleFilename, name = "Filename:")
         dt = F.add(npyscreen.TitleDateCombo, name = "Date:")

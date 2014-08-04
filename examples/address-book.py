@@ -71,15 +71,15 @@ class RecordList(npyscreen.MultiLineAction):
         return "%s, %s" % (vl[1], vl[2])
 
     def actionHighlighted(self, act_on_this, keypress):
-        self.parent.parentApp.getForm('EDITRECORDFM').value =act_on_this[0]
-        self.parent.parentApp.switchForm('EDITRECORDFM')
+        self.parent.parent_app.getForm('EDITRECORDFM').value =act_on_this[0]
+        self.parent.parent_app.switchForm('EDITRECORDFM')
 
     def when_add_record(self, *args, **keywords):
-        self.parent.parentApp.getForm('EDITRECORDFM').value = None
-        self.parent.parentApp.switchForm('EDITRECORDFM')
+        self.parent.parent_app.getForm('EDITRECORDFM').value = None
+        self.parent.parent_app.switchForm('EDITRECORDFM')
 
     def when_delete_record(self, *args, **keywords):
-        self.parent.parentApp.myDatabase.delete_record(self.values[self.cursor_line][0])
+        self.parent.parent_app.myDatabase.delete_record(self.values[self.cursor_line][0])
         self.parent.update_list()
 
 
@@ -89,7 +89,7 @@ class RecordListDisplay(npyscreen.FormMutt):
         self.update_list()
 
     def update_list(self):
-        self.wMain.values = self.parentApp.myDatabase.list_all_records()
+        self.wMain.values = self.parent_app.myDatabase.list_all_records()
         self.wMain.display()
 
 
@@ -102,7 +102,7 @@ class EditRecord(npyscreen.ActionForm):
 
     def before_editing(self):
         if self.value:
-            record = self.parentApp.myDatabase.get_record(self.value)
+            record = self.parent_app.myDatabase.get_record(self.value)
             self.name = "Record id : %s" % record[0]
             self.record_id          = record[0]
             self.wgLastName.value   = record[1]
@@ -117,20 +117,20 @@ class EditRecord(npyscreen.ActionForm):
 
     def on_ok(self):
         if self.record_id: # We are editing an existing record
-            self.parentApp.myDatabase.update_record(self.record_id,
+            self.parent_app.myDatabase.update_record(self.record_id,
                                             last_name=self.wgLastName.value,
                                             other_names = self.wgOtherNames.value,
                                             email_address = self.wgEmail.value,
                                             )
         else: # We are adding a new record.
-            self.parentApp.myDatabase.add_record(last_name=self.wgLastName.value,
+            self.parent_app.myDatabase.add_record(last_name=self.wgLastName.value,
             other_names = self.wgOtherNames.value,
             email_address = self.wgEmail.value,
             )
-        self.parentApp.switchFormPrevious()
+        self.parent_app.switchFormPrevious()
 
     def on_cancel(self):
-        self.parentApp.switchFormPrevious()
+        self.parent_app.switchFormPrevious()
 
 
 

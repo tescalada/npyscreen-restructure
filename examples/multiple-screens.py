@@ -31,7 +31,7 @@ class MainForm(npyscreen.ActionForm):
 
     def on_ok(self):
         # Exit the application if the OK button is pressed.
-        self.parentApp.switchForm(None)
+        self.parent_app.switchForm(None)
 
     def change_forms(self, *args, **keywords):
         if self.name == "Screen 1":
@@ -42,7 +42,7 @@ class MainForm(npyscreen.ActionForm):
             change_to = "MAIN"
 
         # Tell the MyTestApp object to change forms.
-        self.parentApp.change_form(change_to)
+        self.parent_app.change_form(change_to)
     
     
 

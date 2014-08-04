@@ -418,7 +418,7 @@ def testmanaged(*args):
 
      class TestForm(ActionForm.ActionForm):
          def afterEditing(self):
-             self.parentApp.NEXT_ACTIVE_FORM = None
+             self.parent_app.NEXT_ACTIVE_FORM = None
 
      T = NPSAppManaged()
      a = T.addForm('MAIN', TestForm, name='Test')
@@ -432,7 +432,7 @@ def main(*args):
     class TestForm(ActionForm.ActionForm):
         def activate(self):
             self.edit()
-            self.parentApp.NEXT_ACTIVE_FORM = None
+            self.parent_app.NEXT_ACTIVE_FORM = None
     
     T = NPSAppManaged()
     a = T.addForm(TestForm, name='Test')

@@ -14,7 +14,7 @@ class TimeoutForm(npyscreen.Form):
 		self.timeWidget       = self.add(npyscreen.TitleText, name="Time:", value=None, editable = None)
 	
 	def afterEditing(self):
-		self.parentApp.NEXT_ACTIVE_FORM = None
+		self.parent_app.NEXT_ACTIVE_FORM = None
 	
 	def while_waiting(self):
 		self.timeWidget.value = time.asctime()

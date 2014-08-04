@@ -1,23 +1,11 @@
 # encoding: utf-8
 
-import weakref
-#import textwrap  # unused
 import datetime
+#import textwrap  # unused
+import weakref
 
-import npyscreen.widget as widget
-import npyscreen.form as form
-
-#from . import fmForm
-#from . import fmPopup
-#from . import wgtitlefield
-#from . import wgannotatetextbox
-#from . import wgmultiline
-#from . import wgselectone
-#from . import wgmultiselect
-#from . import wgeditmultiline
-#from . import wgcheckbox
-#from . import wgfilenamecombo
-#from . import wgdatecombo
+from ..widget import widget
+from . import form
 
 
 class SimpleOptionForm(form.Form):
@@ -33,7 +21,7 @@ class SimpleOptionForm(form.Form):
     def after_editing(self):
         if self.value.filename:
             self.value.write_to_file()
-        self.parentApp.switchFormPrevious()
+        self.parent_app.switchFormPrevious()
 
 
 class OptionListDisplayLine(widget.AnnotateTextboxBase):

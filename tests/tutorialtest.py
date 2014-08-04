@@ -2,7 +2,7 @@ from npyscreen.app import App
 import npyscreen.form as form
 
 
-class MyEmployeeForm(Form):
+class MyEmployeeForm(form.Form):
     def after_editing(self):
         self.parent_app.NEXT_ACTIVE_FORM = None
 
@@ -16,6 +16,7 @@ class MyEmployeeForm(Form):
                                               'Department 2',
                                               'Department 3'])
         self.my_date = self.add(form.TitleDateCombo, name='Date Employed')
+
 
 class MyApplication(App):
     def on_start(self):

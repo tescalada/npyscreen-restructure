@@ -6,13 +6,14 @@ from . import textbox
 from . import multiline
 from . import titlefield
 
-#This causes circular imports...
+### This causes circular imports... ###
 from ..form.popup import Popup
 
 
 class ComboBox(textbox.Textfield):
     ENSURE_STRING_VALUE = False
-    def __init__(self, screen, value = None, values=None,**kwargs):
+
+    def __init__(self, screen, value=None, values=None, **kwargs):
         self.values = values or []
         self.value = value or None
         if value is 0:
@@ -20,8 +21,12 @@ class ComboBox(textbox.Textfield):
         super(ComboBox, self).__init__(screen, **kwargs)
 
     def display_value(self, vl):
-        """Overload this function to change how values are displayed.
-Should accept one argument (the object to be represented), and return a string."""
+        """
+        Overload this function to change how values are displayed.
+
+        Should accept one argument (the object to be represented), and return a
+        string.
+        """
         return str(vl)
 
     def update(self, **kwargs):
@@ -29,7 +34,8 @@ Should accept one argument (the object to be represented), and return a string."
         super(ComboBox, self).update(**kwargs)
 
     def _print(self):
-        if self.value == None or self.value is '':
+        #if self.value == None or self.value is '':
+        if not self.value:
             printme = '-unset-'
         else:
             try:
@@ -37,9 +43,16 @@ Should accept one argument (the object to be represented), and return a string."
             except IndexError:
                 printme = '-error-'
         if self.do_colors():
-            self.parent.curses_pad.addnstr(self.rely, self.relx, printme, self.width, self.parent.theme_manager.findPair(self))
+            self.parent.curses_pad.addnstr(self.rely,
+                                           self.relx,
+                                           printme,
+                                           self.width,
+                                           self.parent.theme_manager.findPair(self))
         else:
-            self.parent.curses_pad.addnstr(self.rely, self.relx, printme, self.width)
+            self.parent.curses_pad.addnstr(self.rely,
+                                           self.relx,
+                                           printme,
+                                           self.width)
 
     def edit(self):
         #We'll just use the widget one
@@ -48,19 +61,21 @@ Should accept one argument (the object to be represented), and return a string."
     def set_up_handlers(self):
         super(textbox.Textfield, self).set_up_handlers()
 
-        self.handlers.update({curses.ascii.SP:  self.h_change_value,
-                      #curses.ascii.TAB: self.h_change_value,
-                      curses.ascii.NL:  self.h_change_value,
-                      curses.ascii.CR:  self.h_change_value,
-                      ord('x'):         self.h_change_value,
-                      ord('k'):         self.h_exit_up,
-                      ord('j'):         self.h_exit_down,
-                      ord('h'):         self.h_exit_left,
-                      ord('l'):         self.h_exit_right,
-                      })
+        self.handlers.update({curses.ascii.SP: self.h_change_value,
+                              #curses.ascii.TAB: self.h_change_value,
+                              curses.ascii.NL: self.h_change_value,
+                              curses.ascii.CR: self.h_change_value,
+                              ord('x'): self.h_change_value,
+                              ord('k'): self.h_exit_up,
+                              ord('j'): self.h_exit_down,
+                              ord('h'): self.h_exit_left,
+                              ord('l'): self.h_exit_right})
 
     def h_change_value(self, input):
-        "Pop up a window in which to select the values for the field"
+        """
+        Pop up a window in which to select the values for the field.
+        """
+
         F = Popup.Popup(name = self.name)
         l = F.add(multiline.MultiLine,
             values = [self.display_value(x) for x in self.values],
@@ -87,11 +102,10 @@ class TitleCombo(titlefield.TitleText):
         try:
             self.entry_widget.values = values
         except:
-            # probably trying to set the value before the textarea is initialised
+            #probably trying to set the value before the textarea is initialised
             self.__tmp_values = values
 
     def del_values(self):
         del self.entry_widget.values
 
     values = property(get_values, set_values, del_values)
-

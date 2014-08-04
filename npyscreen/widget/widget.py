@@ -9,220 +9,10 @@ from .. import global_options
 import locale
 
 from ..globals import DEBUG
+from ..utils import InputHandler, _LinePrinter
 
-
-class NotEnoughSpaceForWidget(Exception):
-    pass
-
-
-class InputHandler(object):
-    "An object that can handle user input"
-
-    def handle_input(self, _input):
-        """
-        Returns True if input has been dealt with, and no further action needs
-        taking.
-
-        First attempts to look up a method in self.input_handers (which is a
-        dictionary), then runs the methods in self.complex_handlers (if any),
-        which is an array of form (test_func, dispatch_func).
-
-        If test_func(input) returns true, then dispatch_func(input) is called.
-        Check to see if parent can handle.
-        No further action taken after that point.
-        """
-
-        if _input in self.handlers:
-            self.handlers[_input](_input)
-            return True
-
-        try:
-            _unctrl_input = curses.ascii.unctrl(_input)
-        except TypeError:
-            _unctrl_input = None
-
-        if _unctrl_input and (_unctrl_input in self.handlers):
-            self.handlers[_unctrl_input](_input)
-            return True
-
-        if not hasattr(self, 'complex_handlers'):
-            return False
-        else:
-            for test, handler in self.complex_handlers:
-                if test(_input) is not False:
-                    handler(_input)
-                    return True
-        if hasattr(self, 'parent_widget') and hasattr(self.parent_widget, 'handle_input'):
-            if self.parent_widget.handle_input(_input):
-                return True
-        elif hasattr(self, 'parent') and hasattr(self.parent, 'handle_input'):
-            if self.parent.handle_input(_input):
-                return True
-
-        else:
-            pass
-    #If we've got here, all else has failed, so:
-        return False
-
-    def set_up_handlers(self):
-        """
-        This function should be called somewhere during object initialisation
-        (which all library-defined widgets do). You might like to override this
-        in your own definition, but in most cases the `add_handlers` or
-        `add_complex_handlers` methods are what you want.
-        """
-        #called in __init__
-        self.handlers = {
-                   curses.ascii.NL:     self.h_exit_down,
-                   curses.ascii.CR:     self.h_exit_down,
-                   curses.ascii.TAB:    self.h_exit_down,
-                   curses.KEY_BTAB:     self.h_exit_up,
-                   curses.KEY_DOWN:     self.h_exit_down,
-                   curses.KEY_UP:       self.h_exit_up,
-                   curses.KEY_LEFT:     self.h_exit_left,
-                   curses.KEY_RIGHT:    self.h_exit_right,
-                   "^P":                self.h_exit_up,
-                   "^N":                self.h_exit_down,
-                   curses.ascii.ESC:    self.h_exit_escape,
-                   curses.KEY_MOUSE:    self.h_exit_mouse,
-                   }
-
-        self.complex_handlers = []
-
-    def add_handlers(self, handler_dictionary):
-        """
-        Update the dictionary of simple handlers. Pass in a dictionary with
-        keyname (eg "^P" or curses.KEY_DOWN) as the key, and the function that
-        key should call as the values
-        """
-        self.handlers.update(handler_dictionary)
-
-    def add_complex_handlers(self, handlers_list):
-        """add complex handlers: format of the list is pairs of
-        (test_function, callback) sets"""
-
-        for pair in handlers_list:
-            assert len(pair) == 2
-        self.complex_handlers.extend(handlers_list)
-
-    def remove_complex_handler(self, test_function):
-        _new_list = []
-        for pair in self.complex_handlers:
-            if not pair[0] == test_function:
-                _new_list.append(pair)
-        self.complex_handlers = _new_list
-
-################################################################################
-# Handler Methods here - npc convention - prefix with h_
-
-    def h_exit_down(self, _input):
-        """
-        Called when user leaves the widget to the next widget
-        """
-        self.editing = False
-        self.how_exited = EXITED_DOWN
-
-    def h_exit_right(self, _input):
-        self.editing = False
-        self.how_exited = EXITED_RIGHT
-
-    def h_exit_up(self, _input):
-        """Called when the user leaves the widget to the previous widget"""
-        self.editing = False
-        self.how_exited = EXITED_UP
-
-    def h_exit_left(self, _input):
-        self.editing = False
-        self.how_exited = EXITED_LEFT
-
-    def h_exit_escape(self, _input):
-        self.editing = False
-        self.how_exited = EXITED_ESCAPE
-
-    def h_exit_mouse(self, _input):
-        mouse_event = self.parent.safe_get_mouse_event()
-        if mouse_event and self.intersted_in_mouse_event(mouse_event):
-            self.handle_mouse_event(mouse_event)
-        else:
-            if mouse_event:
-                curses.ungetmouse(*mouse_event)
-                ch = self.parent.curses_pad.getch()
-                assert ch == curses.KEY_MOUSE
-            self.editing = False
-            self.how_exited = EXITED_MOUSE
-
-
-class _LinePrinter(object):
-    """
-    A base class for printing lines to the screen.
-    Do not use directly. For internal use only.
-    Experimental.
-    """
-    def find_width_of_char(self, ch):
-        # will eventually need changing.
-        return 1
-
-    def _print_unicode_char(self, ch, force_ascii=None):
-        if hasattr(self, '_force_ascii') and force_ascii is None:
-            force_ascii = self._force_ascii
-        # return the ch to print.  For python 3 this is just ch
-        if force_ascii:
-            return ch.encode('ascii', 'replace')
-        elif sys.version_info[0] >= 3:
-            return ch
-        else:
-            return ch.encode('utf-8', 'replace')
-
-    def add_line(self, realy, realx,
-                unicode_string,
-                attributes_list, max_columns,
-                force_ascii=False):
-        if isinstance(unicode_string, bytes):
-            raise ValueError("This class prints unicode strings only.")
-
-        if len(unicode_string) != len(attributes_list):
-            raise ValueError("Must supply an attribute for every character.")
-
-        column = 0
-        place_in_string = 0
-
-        if hasattr(self, 'curses_pad'):
-            # we are a form
-            print_on = self.curses_pad
-        else:
-            # we are a widget
-            print_on = self.parent.curses_pad
-
-        while column <= (max_columns - 1):
-            try:
-                width_of_char_to_print = self.find_width_of_char(unicode_string[place_in_string])
-            except IndexError:
-                break
-            if column - 1 + width_of_char_to_print > max_columns:
-                break
-            try:
-                print_on.addstr(realy,
-                                realx + column,
-                                self._print_unicode_char(unicode_string[place_in_string]),
-                                attributes_list[place_in_string])
-            except IndexError:
-                break
-            column += width_of_char_to_print
-            place_in_string += 1
-
-    def make_attributes_list(self, unicode_string, attribute):
-        """
-        A convenience function.  Retuns a list the length of the unicode_string
-        provided, with each entry of the list containing a copy of attribute.
-        """
-        if isinstance(unicode_string, bytes):
-            raise ValueError("This class is intended for unicode strings only.")
-
-        atb_array = []
-        ln = len(unicode_string)
-        for x in range(ln):
-            atb_array.append(attribute)
-        return atb_array
+#class NotEnoughSpaceForWidget(Exception):
+    #pass
 
 
 class Widget(InputHandler, _LinePrinter):
@@ -238,17 +28,20 @@ class Widget(InputHandler, _LinePrinter):
         See select. module for an example"""
         pass
 
-    def __init__(self, screen,
-            relx=0, rely=0, name=None, value=None,
-            width = False, height = False,
-            max_height = False, max_width=False,
-            editable=True,
-            hidden=False,
-            color='DEFAULT',
-            use_max_space=False,
-            check_value_change=True,
-            check_cursor_move=True,
-            **kwargs):
+    def __init__(self,
+                 screen,
+                 relx=0, rely=0,
+                 name=None,
+                 value=None,
+                 width=False, height=False,
+                 max_width=False, max_height=False,
+                 editable=True,
+                 hidden=False,
+                 color='DEFAULT',
+                 use_max_space=False,
+                 check_value_change=True,
+                 check_cursor_move=True,
+                 **kwargs):
         """The following named arguments may be supplied:
         name= set the name of the widget.
         width= set the width of the widget.
@@ -260,8 +53,8 @@ class Widget(InputHandler, _LinePrinter):
         check_value_change=True - perform a check on every keypress and run when_value_edit if the value is different.
         check_cursor_move=True - perform a check every keypress and run when_cursor_moved if the cursor has moved.
         """
-        self.check_value_change=check_value_change
-        self.check_cursor_move =check_cursor_move
+        self.check_value_change = check_value_change
+        self.check_cursor_move = check_cursor_move
         self.hidden = hidden
         self.interested_in_mouse_even_when_not_editable = False# used only for rare widgets to allow user to click
                                                         # even if can't actually select the widget.  See mutt-style forms
@@ -273,29 +66,28 @@ class Widget(InputHandler, _LinePrinter):
         self.rely = rely
         self.use_max_space = use_max_space
         self.color = color
-        self.encoding = 'utf-8'#locale.getpreferredencoding()
+        self.encoding = 'utf-8'  # locale.getpreferredencoding()
         if global_options.ASCII_ONLY or locale.getpreferredencoding() == 'US-ASCII':
             self._force_ascii = True
         else:
             self._force_ascii = False
 
-
         self.set_up_handlers()
 
-        # To allow derived classes to set this and then call this method safely...
+        #To allow derived classes to set this and then call this method safely...
         try:
             self.value
         except AttributeError:
             self.value = value
 
-        # same again
+        #same again
         try:
             self.name
         except:
-            self.name=name
+            self.name = name
 
-        self.request_width =  width     # widgets should honour if possible
-        self.request_height = height    # widgets should honour if possible
+        self.request_width = width  # widgets should honor if possible
+        self.request_height = height  # widgets should honor if possible
 
         self.max_height = max_height
         self.max_width = max_width
@@ -305,19 +97,29 @@ class Widget(InputHandler, _LinePrinter):
         self.editing = False        # Change to true during an edit
 
         self.editable = editable
-        if self.parent.curses_pad.getmaxyx()[0]-1 == self.rely: self.on_last_line = True
-        else: self.on_last_line = False
+        if self.parent.curses_pad.getmaxyx()[0] - 1 == self.rely:
+            self.on_last_line = True
+        else:
+            self.on_last_line = False
 
     def _resize(self):
-        "Internal Method. This will be the method called when the terminal resizes."
+        """
+        Internal Method.
+        This will be the method called when the terminal resizes.
+        """
         self._recalculate_size()
-        if self.parent.curses_pad.getmaxyx()[0]-1 == self.rely: self.on_last_line = True
-        else: self.on_last_line = False
+        if self.parent.curses_pad.getmaxyx()[0] - 1 == self.rely:
+            self.on_last_line = True
+        else:
+            self.on_last_line = False
         self.resize()
         self.when_resized()
 
     def resize(self):
-        "Widgets should override this to control what should happen when they are resized."
+        """
+        Widgets should override this to control what should happen when they are
+        resized.
+        """
         pass
 
     def _recalculate_size(self):
@@ -327,37 +129,45 @@ class Widget(InputHandler, _LinePrinter):
         # this method is called when the widget has been resized.
         pass
 
-
     def do_colors(self):
-        "Returns True if the widget should try to paint in coloour."
+        """
+        Returns True if the widget should try to paint in coloour.
+        """
         if curses.has_colors() and not global_options.DISABLE_ALL_COLORS:
             return True
         else:
             return False
 
     def space_available(self):
-        """The space available left on the screen, returned as rows, columns"""
+        """
+        The space available left on the screen, returned as rows, columns
+        """
         if self.use_max_space:
             y, x = self.parent.useable_space(self.rely, self.relx)
         else:
             y, x = self.parent.widget_useable_space(self.rely, self.relx)
-        return y,x
+        return y, x
 
     def calculate_area_needed(self):
-        """Classes should provide a function to
-calculate the screen area they need, returning either y,x, or 0,0 if
-they want all the screen they can.  However, do not use this to say how
-big a given widget is ... use .height and .width instead"""
-        return 0,0
+        """
+        Classes should provide a function to calculate the screen area they
+        need, returning either y,x, or 0,0 if they want all the screen they can.
+
+        However do not use this to say how big a given widget is; use
+        `self.height` and `self.width` instead."""
+        return 0, 0
 
     def set_size(self):
-        """Set the size of the object, reconciling the user's request with the space available"""
+        """
+        Set the size of the object, reconciling the user's request with the
+        space available.
+        """
         my, mx = self.space_available()
         #my = my+1 # Probably want to remove this.
         ny, nx = self.calculate_area_needed()
 
         max_height = self.max_height
-        max_width  = self.max_width
+        max_width = self.max_width
         # What to do if max_height or max_width is negative
         if max_height not in (None, False) and max_height < 0:
             max_height = my + max_height
@@ -385,7 +195,6 @@ big a given widget is ... use .height and .width instead"""
         #if mx <= 0 or my <= 0:
         #    raise Exception("Not enough space for widget")
 
-
         if nx > 0:                 # if a minimum space is specified....
             if mx >= nx:           # if max width is greater than needed space
                 self.width = nx    # width is needed space
@@ -404,14 +213,21 @@ big a given widget is ... use .height and .width instead"""
             raise NotEnoughSpaceForWidget("Not enough space: max y and x = %s , %s. Height and Width = %s , %s " % (my, mx, self.height, self.width) ) # unsafe. Need to add error here.
 
     def update(self, clear=True):
-        """How should object display itself on the screen. Define here, but do not actually refresh the curses
-        display, since this should be done as little as possible.  This base widget puts nothing on screen."""
+        """
+        How should object display itself on the screen.
+
+        Define here, but do not actually refresh the curses display, since this
+        should be done as little as possible.  This base widget puts nothing on
+        screen.
+        """
         if self.hidden:
             self.clear()
             return True
 
     def display(self):
-        """Do an update of the object AND refresh the screen"""
+        """
+        Do an update of the object AND refresh the screen.
+        """
         if self.hidden:
             self.clear()
             self.parent.refresh()
@@ -420,14 +236,18 @@ big a given widget is ... use .height and .width instead"""
             self.parent.refresh()
 
     def set_editable(self, value):
-        if value: self._is_editable = True
-        else: self._is_editable = False
+        if value:
+            self._is_editable = True
+        else:
+            self._is_editable = False
 
     def get_editable(self):
         return(self._is_editable)
 
     def clear(self, usechar=' '):
-        """Blank the screen area used by this widget, ready for redrawing"""
+        """
+        Blank the screen area used by this widget, ready for redrawing.
+        """
         for y in range(self.height):
 #This method is too slow
 #           for x in range(self.width+1):
@@ -437,9 +257,14 @@ big a given widget is ... use .height and .width instead"""
 #               except: pass
 #Use this instead
             if self.do_colors():
-                self.parent.curses_pad.addstr(self.rely+y, self.relx, usechar * (self.width), self.parent.theme_manager.findPair(self, self.parent.color))  # used to be width + 1
+                self.parent.curses_pad.addstr(self.rely + y,
+                                              self.relx,
+                                              usechar * self.width,
+                                              self.parent.theme_manager.findPair(self, self.parent.color))  # used to be width + 1
             else:
-                self.parent.curses_pad.addstr(self.rely+y, self.relx, usechar * (self.width))  # used to be width + 1
+                self.parent.curses_pad.addstr(self.rely + y,
+                                              self.relx,
+                                              usechar * self.width)  # used to be width + 1
 
     def edit(self):
         """Allow the user to edit the widget: ie. start handling keypresses."""
@@ -456,7 +281,7 @@ big a given widget is ... use .height and .width instead"""
     def _edit_loop(self):
         if not self.parent.editing:
             _i_set_parent_editing = True
-            self.parent.editing   = True
+            self.parent.editing = True
         else:
             _i_set_parent_editing = False
         while self.editing and self.parent.editing:
@@ -466,7 +291,7 @@ big a given widget is ... use .height and .width instead"""
             self.parent.editing = False
 
         if self.editing:
-            self.editing    = False
+            self.editing = False
             self.how_exited = True
 
     def _post_edit(self):
@@ -570,7 +395,7 @@ big a given widget is ... use .height and .width instead"""
             ch2 = self.parent.curses_pad.getch()
             if ch2 != -1:
                 ch = curses.ascii.alt(ch2)
-            self.parent.curses_pad.timeout(-1) # back to blocking mode
+            self.parent.curses_pad.timeout(-1)  # back to blocking mode
             #curses.flushinp()
 
         self.handle_input(ch)
@@ -578,7 +403,6 @@ big a given widget is ... use .height and .width instead"""
             self.when_check_value_changed()
         if self.check_cursor_move:
             self.when_check_cursor_moved()
-
 
         self.try_adjust_widgets()
 
@@ -588,8 +412,8 @@ big a given widget is ... use .height and .width instead"""
         mouse_id, x, y, z, bstate = mouse_event
         x += self.parent.show_from_x
         y += self.parent.show_from_y
-        if self.relx <= x <= self.relx + self.width-1 + self.parent.show_atx:
-            if self.rely  <= y <= self.rely + self.height-1 + self.parent.show_aty:
+        if self.relx <= x <= self.relx + self.width - 1 + self.parent.show_atx:
+            if self.rely <= y <= self.rely + self.height - 1 + self.parent.show_aty:
                 return True
         return False
 
@@ -610,7 +434,10 @@ big a given widget is ... use .height and .width instead"""
         #pass
 
     def when_check_value_changed(self):
-        "Check whether the widget's value has changed and call when_valued_edited if so."
+        """
+        Check whether the widget's value has changed and call
+        `when_valued_edited` if so.
+        """
         try:
             if self.value == self._old_value:
                 return False
@@ -625,8 +452,10 @@ big a given widget is ... use .height and .width instead"""
         return True
 
     def when_value_edited(self):
-        """Called when the user edits the value of the widget.  Will usually also be called the first time
-        that the user edits the widget."""
+        """
+        Called when the user edits the value of the widget. Will usually also be
+        called the first time that the user edits the widget.
+        """
         pass
 
     def when_check_cursor_moved(self):
@@ -650,11 +479,14 @@ big a given widget is ... use .height and .width instead"""
             self.parent_widget.when_cursor_moved()
 
     def when_cursor_moved(self):
-        "Called when the cursor moves"
+        """
+        Called when the cursor moves.
+        """
         pass
 
     def safe_string(self, this_string):
-        """Check that what you are trying to display contains only
+        """
+        Check that what you are trying to display contains only
         printable chars.  (Try to catch dodgy input).  Give it a string,
         and it will return a string safe to print - without touching
         the original.  In Python 3 this function is not needed
@@ -669,7 +501,8 @@ big a given widget is ... use .height and .width instead"""
             # In python 3
             #if sys.version_info[0] >= 3:
             #    return this_string.replace('\n', ' ')
-            if self.__class__._SAFE_STRING_STRIPS_NL == True:
+            #if self.__class__._SAFE_STRING_STRIPS_NL == True:
+            if self.__class__._SAFE_STRING_STRIPS_NL:
                 rtn_value = this_string.replace('\n', ' ')
             else:
                 rtn_value = this_string
@@ -720,7 +553,7 @@ big a given widget is ... use .height and .width instead"""
             this_string = this_string.decode(self.encoding, 'replace')
             return this_string.encode('ascii', 'replace').decode()
         except:
-            # Things have gone badly wrong if we get here, but let's try to salvage it.
+            #Things have gone badly wrong if we get here, but let's try to salvage it.
             try:
                 if self._safe_filter_value_cache[0] == this_string:
                     return self._safe_filter_value_cache[1]

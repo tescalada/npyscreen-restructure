@@ -43,28 +43,36 @@ class ScreenArea(object):
     SHOW_ATX = 0
     SHOW_ATY = 0
 
-    def __init__(self, lines=0, columns=0, minimum_lines=24, minimum_columns=80,
-                 show_atx=0, show_aty=0, **kwargs):
+    def __init__(self,
+                 lines=0,
+                 columns=0,
+                 minimum_lines=24,
+                 minimum_columns=80,
+                 show_atx=0,
+                 show_aty=0,
+                 **kwargs):
 
-
-    # Putting a default in here will override the system in _create_screen. For testing?
+        #Putting a default in here will override the system in _create_screen.
+        #For testing?
         if not lines:
             lines = self.__class__.DEFAULT_LINES
         if not columns:
             columns = self.__class__.DEFAULT_COLUMNS
 
-        if lines:   minimum_lines   = lines
-        if columns: minimum_columns = columns
+        if lines:
+            minimum_lines = lines
+        if columns:
+            minimum_columns = columns
 
-        self.lines = lines #or 25
-        self.columns = columns #or 80
+        self.lines = lines  # or 25
+        self.columns = columns  # or 80
 
         self.min_l = minimum_lines
         self.min_c = minimum_columns
 
-        # Panels can be bigger than the screen area. These two variables
-        # set which bit of the panel should be visible.
-        # ie. They are about the virtual, not the physical, screen.
+        #Panels can be bigger than the screen area. These two variables
+        #set which bit of the panel should be visible.
+        #ie. They are about the virtual, not the physical, screen.
         self.show_from_y = 0
         self.show_from_x = 0
         self.show_atx = show_atx or self.__class__.SHOW_ATX
@@ -92,10 +100,10 @@ class ScreenArea(object):
             pass
 
         if not self.lines:
-            self.lines = self._max_physical()[0]+1
+            self.lines = self._max_physical()[0] + 1
             self.lines_were_auto_set = True
         if not self.columns:
-            self.columns = self._max_physical()[1]+1
+            self.columns = self._max_physical()[1] + 1
             self.cols_were_auto_set = True
 
         if self.min_l > self.lines:
@@ -110,7 +118,9 @@ class ScreenArea(object):
         self.max_y, self.max_x = self.curses_pad.getmaxyx()
 
     def _max_physical(self):
-        "How big is the physical screen?"
+        """
+        How big is the physical screen?
+        """
         # On OS X newwin does not correctly get the size of the screen.
         # let's see how big we could be: create a temp screen
         # and see the size curses makes it.  No good to keep, though

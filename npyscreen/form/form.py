@@ -15,10 +15,12 @@ from .. import util_viewhelp
 from ..globals import DISABLE_RESIZE_SYSTEM
 from .. import global_options
 
+from ..utils import InputHandler, _LinePrinter
+
 
 class _FormBase(ScreenArea,
-                widget.InputHandler,
-                widget._LinePrinter):
+                InputHandler,
+                _LinePrinter):
     BLANK_COLUMNS_RIGHT = 2
     BLANK_LINES_BASE = 2
     OK_BUTTON_TEXT = 'OK'

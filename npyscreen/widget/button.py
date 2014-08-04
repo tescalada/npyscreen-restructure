@@ -65,9 +65,9 @@ class MiniButtonPress(MiniButton):
     def h_toggle(self, ch):
         self.value = True
         self.display()
-        self.whenPressed()
+        self.when_pressed()
         self.value = False
         self.display()
 
-    def whenPressed(self):
+    def when_pressed(self):
         pass
